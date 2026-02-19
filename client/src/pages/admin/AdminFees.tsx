@@ -16,14 +16,30 @@ const AdminFees = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
 
-    const { register, handleSubmit, reset, formState: { errors } } = useForm();
+    interface FeeFormValues {
+        targetGroup: 'individual' | 'all' | 'verified' | 'pending';
+        studentId?: string;
+        title: string;
+        amount: number;
+        type: string;
+        dueDate: string;
+        description?: string;
+    }
 
-    const onSubmit = async (data: any) => {
+    const { register, handleSubmit, reset, watch, formState: { errors } } = useForm<FeeFormValues>({
+        defaultValues: {
+            targetGroup: 'individual'
+        }
+    });
+
+    const targetGroupValue = watch('targetGroup');
+
+    const onSubmit = async (data: FeeFormValues) => {
         try {
             await api.post('/fees', data);
-            toast.success('Fee created successfully');
+            toast.success(data.targetGroup === 'individual' ? 'Fee created successfully' : `Fees created for ${data.targetGroup} students`);
             setIsModalOpen(false);
-            reset();
+            reset({ targetGroup: 'individual' });
             refetch();
         } catch (error: any) {
             toast.error(error.response?.data?.message || 'Failed to create fee');
@@ -223,20 +239,35 @@ const AdminFees = () => {
 
                                     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">Select Student</label>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">Target Group</label>
                                             <select
-                                                {...register('studentId', { required: 'Please select a student' })}
+                                                {...register('targetGroup', { required: 'Please select a target group' })}
                                                 className="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
                                             >
-                                                <option value="">Choose a student...</option>
-                                                {students.map((student: any) => (
-                                                    <option key={student._id} value={student._id}>
-                                                        {student.name} ({student.profile?.studentId})
-                                                    </option>
-                                                ))}
+                                                <option value="individual">Single Student</option>
+                                                <option value="all">All Students</option>
+                                                <option value="verified">Verified Students Only</option>
+                                                <option value="pending">Pending Verification Students</option>
                                             </select>
-                                            {errors.studentId && <p className="text-xs text-red-500 mt-1">{String(errors.studentId.message)}</p>}
                                         </div>
+
+                                        {targetGroupValue === 'individual' && (
+                                            <div className="animate-in slide-in-from-top-2 duration-300">
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">Select Student</label>
+                                                <select
+                                                    {...register('studentId', { required: targetGroupValue === 'individual' ? 'Please select a student' : false })}
+                                                    className="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
+                                                >
+                                                    <option value="">Choose a student...</option>
+                                                    {students.map((student: any) => (
+                                                        <option key={student._id} value={student._id}>
+                                                            {student.name} ({student.profile?.studentId})
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                                {errors.studentId && <p className="text-xs text-red-500 mt-1">{String(errors.studentId.message)}</p>}
+                                            </div>
+                                        )}
 
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-1">Fee Title</label>

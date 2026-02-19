@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import asyncHandler from 'express-async-handler';
 import Fee from '../models/Fee';
+import User from '../models/User';
 import { createNotification } from './notificationController';
 import { logAudit } from '../utils/auditLogger';
 
@@ -24,25 +25,86 @@ export const getAllFees = asyncHandler(async (req: Request, res: Response) => {
 // @route   POST /api/fees
 // @access  Private (Admin)
 export const createFee = asyncHandler(async (req: any, res: Response) => {
-    const { studentId, title, amount, dueDate, type, description } = req.body;
+    const { studentId, targetGroup, title, amount, dueDate, type, description } = req.body;
 
-    const fee = await Fee.create({
-        student: studentId,
-        title,
-        amount,
-        dueDate,
-        type,
-        description
-    });
+    if (targetGroup === 'individual' || !targetGroup) {
+        if (!studentId) {
+            res.status(400);
+            throw new Error('Please select a student');
+        }
 
-    await createNotification(
-        studentId,
-        'New Fee Due',
-        `A new fee "${title}" of amount ₹${amount} has been added. Due date: ${new Date(dueDate).toLocaleDateString()}`,
-        'info'
-    );
+        const fee = await Fee.create({
+            student: studentId,
+            title,
+            amount,
+            dueDate,
+            type,
+            description
+        });
 
-    res.status(201).json(fee);
+        await createNotification(
+            studentId,
+            'New Fee Due',
+            `A new fee "${title}" of amount ₹${amount} has been added. Due date: ${new Date(dueDate).toLocaleDateString()}`,
+            'info'
+        );
+
+        res.status(201).json(fee);
+    } else {
+        // Bulk creation
+        let students = [];
+        if (targetGroup === 'all') {
+            students = await User.find({ role: 'student', isActive: true });
+        } else if (targetGroup === 'verified') {
+            students = await User.find({ role: 'student', isActive: true, 'profile.isVerified': true });
+        } else if (targetGroup === 'pending') {
+            students = await User.find({ role: 'student', isActive: true, 'profile.isVerified': false });
+        }
+
+        if (students.length === 0) {
+            res.status(400);
+            throw new Error(`No students found in the selected group: ${targetGroup}`);
+        }
+
+        const feesToCreate = students.map(s => ({
+            student: s._id,
+            title,
+            amount,
+            dueDate,
+            type,
+            description,
+            amountPaid: 0,
+            status: 'unpaid'
+        }));
+
+        const createdFees = await Fee.insertMany(feesToCreate);
+
+        // Bulk Notifications (Parallel)
+        const notificationPromises = students.map(s =>
+            createNotification(
+                s._id.toString(),
+                'New Fee Due',
+                `A new fee "${title}" of amount ₹${amount} has been added. Due date: ${new Date(dueDate).toLocaleDateString()}`,
+                'info'
+            ).catch(err => console.error(`Failed to notify student ${s._id}:`, err))
+        );
+
+        await Promise.all(notificationPromises);
+
+        // Audit Log for bulk action
+        try {
+            await logAudit(
+                req.user._id,
+                'FEE_BULK_CREATE',
+                'system',
+                'Fee',
+                `Bulk fee "${title}" (₹${amount}) created for ${students.length} students (Group: ${targetGroup})`,
+                req.ip || req.socket.remoteAddress || ''
+            );
+        } catch (err) { console.error("Audit log failed", err) }
+
+        res.status(201).json({ message: `Fees created for ${students.length} students`, count: students.length });
+    }
 });
 
 // @desc    Update fee payment (Simulated)
