@@ -9,6 +9,11 @@ import hpp from 'hpp';
 
 const app = express();
 
+// Health check route
+app.get('/', (req, res) => {
+    res.json({ status: 'success', message: 'Smart HMS API is running' });
+});
+
 // Security Middleware
 app.use(helmet({
     contentSecurityPolicy: false, // Disable CSP for development to allow external sound/socket
