@@ -9,6 +9,9 @@ import hpp from 'hpp';
 
 const app = express();
 
+// Trust proxy for rate limiting (Render/Vercel)
+app.set('trust proxy', 1);
+
 // Health check route
 app.get('/', (req, res) => {
     res.json({ status: 'success', message: 'Smart HMS API is running' });
