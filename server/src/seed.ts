@@ -19,7 +19,10 @@ dotenv.config({ path: path.join(__dirname, '../.env') });
 
 const seedDB = async () => {
     try {
-        await mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/hostel_db');
+        if (!process.env.MONGO_URI) {
+            throw new Error('MONGO_URI is not defined in environment variables');
+        }
+        await mongoose.connect(process.env.MONGO_URI);
         console.log('Connected to DB...');
 
         // Create dummy entries to force collection creation
