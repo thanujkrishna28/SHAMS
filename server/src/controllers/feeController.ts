@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import asyncHandler from 'express-async-handler';
 import Fee from '../models/Fee';
-import User from '../models/User';
+import User, { IUser } from '../models/User';
 import { createNotification } from './notificationController';
 import { logAudit } from '../utils/auditLogger';
 
@@ -52,7 +52,7 @@ export const createFee = asyncHandler(async (req: any, res: Response) => {
         res.status(201).json(fee);
     } else {
         // Bulk creation
-        let students = [];
+        let students: IUser[] = [];
         if (targetGroup === 'all') {
             students = await User.find({ role: 'student', isActive: true });
         } else if (targetGroup === 'verified') {
@@ -74,7 +74,7 @@ export const createFee = asyncHandler(async (req: any, res: Response) => {
             type,
             description,
             amountPaid: 0,
-            status: 'unpaid'
+            status: 'pending'
         }));
 
         const createdFees = await Fee.insertMany(feesToCreate);
