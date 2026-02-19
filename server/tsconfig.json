@@ -10,17 +10,11 @@
         "strict": true,
         "skipLibCheck": true,
         "typeRoots": [
-            "./node_modules/@types",
-            "./src/types"
-        ],
-        "types": [
-            "node",
-            "express"
+            "./node_modules/@types"
         ]
     },
     "include": [
-        "src/**/*",
-        "src/types/**/*.d.ts"
+        "src/**/*"
     ],
     "exclude": [
         "node_modules"

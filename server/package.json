@@ -13,7 +13,18 @@
     "author": "",
     "license": "ISC",
     "dependencies": {
+        "@types/bcryptjs": "^2.4.6",
+        "@types/cors": "^2.8.17",
+        "@types/express": "^4.17.21",
+        "@types/hpp": "^0.2.7",
+        "@types/jsonwebtoken": "^9.0.10",
+        "@types/morgan": "^1.9.10",
+        "@types/multer": "^1.4.13",
+        "@types/node": "^20.10.5",
+        "@types/nodemailer": "^7.0.10",
+        "@types/pdfkit": "^0.17.5",
         "@types/socket.io": "^3.0.2",
+        "@types/uuid": "^11.0.0",
         "bcryptjs": "^2.4.3",
         "cors": "^2.8.5",
         "dotenv": "^16.3.1",
@@ -31,23 +42,12 @@
         "pdfkit": "^0.17.2",
         "qrcode": "^1.5.4",
         "socket.io": "^4.8.3",
+        "typescript": "^5.3.3",
         "uuid": "^13.0.0",
         "zod": "^3.25.76"
     },
     "devDependencies": {
-        "@types/bcryptjs": "^2.4.6",
-        "@types/cors": "^2.8.17",
-        "@types/express": "^4.17.21",
-        "@types/hpp": "^0.2.7",
-        "@types/jsonwebtoken": "^9.0.10",
-        "@types/morgan": "^1.9.10",
-        "@types/multer": "^1.4.13",
-        "@types/node": "^20.10.5",
-        "@types/nodemailer": "^7.0.10",
-        "@types/pdfkit": "^0.17.5",
-        "@types/uuid": "^11.0.0",
         "nodemon": "^3.0.2",
-        "ts-node": "^10.9.2",
-        "typescript": "^5.3.3"
+        "ts-node": "^10.9.2"
     }
 }
