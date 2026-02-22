@@ -100,6 +100,7 @@ function App() {
                 <Route path="leaves" element={<AdminLeaves />} />
                 <Route path="visitors" element={<Visitors />} />
                 <Route path="complaints" element={<AdminComplaints />} />
+                <Route path="scanner" element={<SecurityScanner />} />
                 <Route path="settings" element={<AdminSettings />} />
                 <Route path="about" element={<AboutUs />} />
               </Route>

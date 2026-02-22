@@ -19,7 +19,8 @@ import {
     Info,
     ClipboardCheck,
     Bed,
-    Building2
+    Building2,
+    Scan
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import NotificationList from './NotificationList';
@@ -50,6 +51,7 @@ const AdminLayout = () => {
         { name: 'Leaves', path: '/admin/leaves', icon: CalendarDays },
         { name: 'Visitors', path: '/admin/visitors', icon: ShieldCheck },
         { name: 'Complaints', path: '/admin/complaints', icon: MessageSquare },
+        { name: 'Scanner', path: '/admin/scanner', icon: Scan },
         { name: 'Settings', path: '/admin/settings', icon: Settings },
         { name: 'About', path: '/admin/about', icon: Info },
     ];
