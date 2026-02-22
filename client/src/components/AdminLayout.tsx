@@ -19,7 +19,7 @@ import {
     Info,
     ClipboardCheck,
     Bed,
-    CreditCard
+    Building2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import NotificationList from './NotificationList';
@@ -42,6 +42,7 @@ const AdminLayout = () => {
 
     const navItems = [
         { name: 'Dashboard', path: '/admin/dashboard', icon: LayoutDashboard },
+        { name: 'Hostels', path: '/admin/hostels', icon: Building2 },
         { name: 'Students', path: '/admin/students', icon: Users },
         { name: 'Rooms', path: '/admin/rooms', icon: Bed },
         { name: 'Allocations', path: '/admin/allocations', icon: ClipboardCheck },
@@ -49,7 +50,6 @@ const AdminLayout = () => {
         { name: 'Leaves', path: '/admin/leaves', icon: CalendarDays },
         { name: 'Visitors', path: '/admin/visitors', icon: ShieldCheck },
         { name: 'Complaints', path: '/admin/complaints', icon: MessageSquare },
-        { name: 'Fees', path: '/admin/fees', icon: CreditCard },
         { name: 'Settings', path: '/admin/settings', icon: Settings },
         { name: 'About', path: '/admin/about', icon: Info },
     ];

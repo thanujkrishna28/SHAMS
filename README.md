@@ -40,8 +40,12 @@ A comprehensive MERN stack web application for managing modern university hostel
   - Safety protocols & digital gate-pass system.
 
 ### 👮‍♂️ For Admins
+- **Premium Admin Suite**: 
+  - **High-Fidelity UI**: Completely modernized, SaaS-style interface with glassmorphic cards and motion transitions.
+  - **Intelligent Filtering**: Advanced multi-layer filtering (by Building, Block, Status, Track, and type) across all modules.
+  - **Dossier-Style Roster**: Comprehensive student management with profile image integration.
 - **Dashboard**: 
-  - Real-time stats on occupancy, pending requests, and attendance.
+  - Real-time stats on occupancy, pending requests, and performance KPIs.
   - **Advanced Analytics**: Attendance trends (last 7 days), complaint resolution time, and allocation processing time.
 - **Student Management**: 
   - List all students.

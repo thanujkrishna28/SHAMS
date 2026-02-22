@@ -5,6 +5,7 @@ import {
     getRoomById,
     createRoom,
     createBulkRooms,
+    createSmartBatch,
     updateRoom,
     deleteRoom,
     lockRoom
@@ -17,6 +18,7 @@ router.route('/')
     .post(protect, authorize('admin'), createRoom);
 
 router.post('/bulk', protect, authorize('admin'), createBulkRooms);
+router.post('/smart-batch', protect, authorize('admin'), createSmartBatch);
 
 router.route('/:id')
     .get(protect, getRoomById)

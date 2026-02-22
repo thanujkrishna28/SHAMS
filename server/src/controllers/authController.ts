@@ -1,16 +1,18 @@
 import { Request, Response } from 'express';
 import asyncHandler from 'express-async-handler';
 import User from '../models/User';
+import Admin from '../models/Admin';
 import generateToken from '../utils/generateToken';
 import { z } from 'zod';
 import sendEmail from '../utils/sendEmail';
+import { getWelcomeEmail } from '../utils/emailTemplates';
 
 // Zod Schemas
 const registerSchema = z.object({
     name: z.string().min(2),
     email: z.string().email(),
     password: z.string().min(6),
-    role: z.enum(['admin', 'student']).optional(),
+    role: z.enum(['student', 'guardian', 'security']).optional(),
 });
 
 const loginSchema = z.object({
@@ -22,14 +24,12 @@ const loginSchema = z.object({
 // @route   POST /api/auth/register
 // @access  Public
 export const registerUser = asyncHandler(async (req: Request, res: Response) => {
-    const validation = registerSchema.safeParse(req.body);
-
-    if (!validation.success) {
-        res.status(400);
-        throw new Error(validation.error.errors[0].message);
-    }
-
-    const { name, email, password, role } = req.body;
+    const {
+        name, email, password, role,
+        gender, phone, address, age,
+        guardianName, relation, guardianContact, guardianContact2,
+        course, branch, year, applicationNum, aadharNum, studentId
+    } = req.body;
 
     const userExists = await User.findOne({ email });
 
@@ -44,21 +44,34 @@ export const registerUser = asyncHandler(async (req: Request, res: Response) => 
         password,
         role: role || 'student', // Default to student
         profile: {
-            studentId: req.body.studentId
+            gender,
+            phone,
+            address,
+            age: age ? parseInt(age) : undefined,
+            guardianName,
+            relation,
+            guardianContact,
+            guardianContact2,
+            course,
+            branch,
+            year: year ? parseInt(year) : undefined,
+            applicationNum,
+            aadharNum,
         }
     });
 
     if (user) {
         // Send Welcome Email
         try {
+            const html = getWelcomeEmail(user.name);
             await sendEmail({
                 email: user.email,
                 subject: 'Welcome to Smart HMS',
-                message: `Hi ${user.name},\n\nWelcome to Smart HMS! Your account has been created successfully.\n\nYour Student ID: ${req.body.studentId || 'N/A'}\n\nPlease complete your profile to access hostel services.\n\nRegards,\nSmart HMS Team`,
+                message: `Hi ${user.name}, Welcome to Smart HMS! Your account has been created successfully.`,
+                html
             });
         } catch (error) {
             console.error('Email send failed:', error);
-            // Don't fail registration if email fails
         }
 
         res.status(201).json({
@@ -81,14 +94,24 @@ export const registerUser = asyncHandler(async (req: Request, res: Response) => 
 export const loginUser = asyncHandler(async (req: Request, res: Response) => {
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email });
+    // Check in Users first (Students/Security)
+    let user: any = await User.findOne({ email });
+    let role;
+
+    if (user) {
+        role = user.role;
+    } else {
+        // If not found in Users, check in Admins
+        user = await Admin.findOne({ email });
+        if (user) role = 'admin';
+    }
 
     if (user && (await user.matchPassword(password))) {
         res.json({
             _id: user._id,
             name: user.name,
             email: user.email,
-            role: user.role,
+            role: role,
             profile: user.profile,
             token: generateToken(user._id as unknown as string),
         });
@@ -102,13 +125,29 @@ export const loginUser = asyncHandler(async (req: Request, res: Response) => {
 // @route   GET /api/auth/profile
 // @access  Private
 export const getUserProfile = asyncHandler(async (req: Request, res: Response) => {
-    const user = await User.findById((req as any).user._id).populate({
-        path: 'profile.room',
-        populate: {
-            path: 'occupants',
-            select: 'name email profile.studentId'
-        }
-    });
+    let user: any;
+
+    if ((req as any).user.role === 'admin') {
+        user = await Admin.findById((req as any).user._id).select('-password');
+    } else {
+        user = await User.findById((req as any).user._id).select('-password').populate({
+            path: 'profile.room',
+            populate: [
+                {
+                    path: 'occupants',
+                    select: 'name email profile.studentId'
+                },
+                {
+                    path: 'block',
+                    select: 'name'
+                },
+                {
+                    path: 'hostel',
+                    select: 'name'
+                }
+            ]
+        });
+    }
 
     if (user) {
         res.json({
@@ -131,7 +170,12 @@ export const updateUserProfile = asyncHandler(async (req: Request, res: Response
     const user = await User.findById((req as any).user._id);
 
     if (user) {
-        const { studentId, course, year, guardianName, guardianContact, address, idProof, admissionLetter } = req.body;
+        const {
+            studentId, course, year, guardianName, guardianContact,
+            address, idProof, admissionLetter, gender, branch,
+            relation, guardianContact2, phone, age, applicationNum, aadharNum,
+            profileImage
+        } = req.body;
 
         if (!user.profile) {
             user.profile = {};
@@ -145,6 +189,15 @@ export const updateUserProfile = asyncHandler(async (req: Request, res: Response
         if (address) user.profile.address = address;
         if (idProof) user.profile.idProof = idProof;
         if (admissionLetter) user.profile.admissionLetter = admissionLetter;
+        if (gender) user.profile.gender = gender;
+        if (branch) user.profile.branch = branch;
+        if (relation) user.profile.relation = relation;
+        if (guardianContact2) user.profile.guardianContact2 = guardianContact2;
+        if (phone) user.profile.phone = phone;
+        if (age) user.profile.age = parseInt(age);
+        if (applicationNum) user.profile.applicationNum = applicationNum;
+        if (aadharNum) user.profile.aadharNum = aadharNum;
+        if (profileImage) user.profile.profileImage = profileImage;
 
         // If documents are uploaded, setting verified to false to require re-verification?
         // Or just let admin verify. Let's keep it simple.

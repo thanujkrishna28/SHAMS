@@ -1,14 +1,15 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
 export interface IRoom extends Document {
-    block: string;
+    block: mongoose.Types.ObjectId;
+    hostel: mongoose.Types.ObjectId;
     floor: number;
     roomNumber: string;
     capacity: number;
     occupants: mongoose.Types.ObjectId[];
-    type: 'single' | 'double' | 'triple' | 'dorm';
+    type: 'Single' | 'Double' | 'Triple' | 'Dorm' | 'single' | 'double' | 'triple' | 'dorm';
     isAC: boolean;
-    status: 'available' | 'full' | 'maintenance' | 'locked';
+    status: 'Available' | 'Full' | 'Maintenance' | 'Locked' | 'available' | 'full' | 'maintenance' | 'locked';
     lockExpiresAt?: Date;
     lockedBy?: mongoose.Types.ObjectId;
     createdAt: Date;
@@ -17,21 +18,22 @@ export interface IRoom extends Document {
 
 const RoomSchema: Schema = new Schema(
     {
-        block: { type: String, required: true, index: true },
-        floor: { type: Number, required: true },
         roomNumber: { type: String, required: true, unique: true },
+        block: { type: Schema.Types.ObjectId, ref: 'Block', required: true, index: true },
+        hostel: { type: Schema.Types.ObjectId, ref: 'Hostel', required: true, index: true },
+        floor: { type: Number, required: true },
         capacity: { type: Number, required: true, default: 2 },
         occupants: [{ type: Schema.Types.ObjectId, ref: 'User' }],
         type: {
             type: String,
-            enum: ['single', 'double', 'triple', 'dorm'],
-            default: 'double',
+            enum: ['Single', 'Double', 'Triple', 'Dorm', 'single', 'double', 'triple', 'dorm'],
+            default: 'Double',
         },
         isAC: { type: Boolean, default: false },
         status: {
             type: String,
-            enum: ['available', 'full', 'maintenance', 'locked'], // 'locked' for allocation transaction
-            default: 'available',
+            enum: ['Available', 'Full', 'Maintenance', 'Locked', 'available', 'full', 'maintenance', 'locked'],
+            default: 'Available',
         },
         lockExpiresAt: { type: Date },
         lockedBy: { type: Schema.Types.ObjectId, ref: 'User' },

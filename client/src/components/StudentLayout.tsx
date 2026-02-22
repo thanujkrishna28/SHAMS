@@ -1,6 +1,7 @@
 import React from 'react';
 import { NavLink, useNavigate, useLocation, Outlet } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
+import { getImageUrl } from '@/utils/imageUtils';
 import {
     LayoutDashboard,
     Bed,
@@ -16,7 +17,8 @@ import {
     ChevronRight,
     Utensils,
     Info,
-    UserPlus
+    UserPlus,
+    Building
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import NotificationList from './NotificationList';
@@ -45,6 +47,7 @@ const StudentLayout = () => {
         { name: 'Dashboard', path: '/student/dashboard', icon: LayoutDashboard },
         { name: 'Profile', path: '/student/profile', icon: User },
         { name: 'My Room', path: '/student/room', icon: Bed },
+        { name: 'Find Room', path: '/student/selection', icon: Building },
         { name: 'Attendance', path: '/student/attendance', icon: Clock },
         { name: 'Mess', path: '/student/mess', icon: Utensils },
         { name: 'Leave', path: '/student/leave', icon: CalendarDays },
@@ -86,8 +89,16 @@ const StudentLayout = () => {
                         {/* User Profile Snippet */}
                         <div className="p-4 border-b border-border/50 bg-gray-50/50">
                             <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-primary to-primary-hover flex items-center justify-center text-white font-semibold shadow-md">
-                                    {user?.name?.charAt(0) || 'U'}
+                                <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-primary to-primary-hover flex items-center justify-center text-white font-semibold shadow-md overflow-hidden">
+                                    {user?.profile?.profileImage ? (
+                                        <img
+                                            src={getImageUrl(user.profile.profileImage) || ''}
+                                            alt="User"
+                                            className="w-full h-full object-cover"
+                                        />
+                                    ) : (
+                                        user?.name?.charAt(0) || 'U'
+                                    )}
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <p className="text-sm font-semibold text-gray-900 truncate">{user?.name || 'Student'}</p>

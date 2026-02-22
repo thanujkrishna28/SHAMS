@@ -20,6 +20,7 @@ app.get('/', (req, res) => {
 // Security Middleware
 app.use(helmet({
     contentSecurityPolicy: false, // Disable CSP for development to allow external sound/socket
+    crossOriginResourcePolicy: { policy: "cross-origin" },
 }));
 app.use(mongoSanitize());
 app.use(hpp());
@@ -29,18 +30,30 @@ const allowedOrigins = [
     process.env.FRONTEND_URL,
     'https://shams-green.vercel.app',
     'http://localhost:5173',
-    'http://localhost:3000'
+    'http://localhost:3000',
+    'http://192.168.0.101:5173'
 ].filter(Boolean) as string[];
 
 app.use(cors({
     origin: (origin, callback) => {
         // allow requests with no origin (like mobile apps or curl requests)
         if (!origin) return callback(null, true);
-        if (allowedOrigins.indexOf(origin) === -1) {
+
+        const isLocal = origin.startsWith('http://localhost') ||
+            origin.startsWith('http://127.0.0.1') ||
+            origin.startsWith('http://192.168.') ||
+            origin.startsWith('http://10.') ||
+            origin.startsWith('http://172.');
+
+        const isAllowedExplicitly = allowedOrigins.indexOf(origin) !== -1;
+
+        if (isAllowedExplicitly || isLocal) {
+            return callback(null, true);
+        } else {
+            console.error(`CORS Blocked for origin: ${origin}`);
             const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
             return callback(new Error(msg), false);
         }
-        return callback(null, true);
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
@@ -58,7 +71,7 @@ app.use(morgan('dev'));
 // Global Rate Limiting
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // Limit each IP to 100 requests per windowMs
+    max: process.env.NODE_ENV === 'production' ? 100 : 10000, // High limit for dev
     message: 'Too many requests from this IP, please try again after 15 minutes',
     standardHeaders: true,
     legacyHeaders: false,
@@ -80,7 +93,8 @@ import visitorRoutes from './routes/visitorRoutes';
 import reportRoutes from './routes/reportRoutes';
 import messRoutes from './routes/messRoutes';
 import settingsRoutes from './routes/settingsRoutes';
-import feeRoutes from './routes/feeRoutes';
+import hostelRoutes from './routes/hostelRoutes';
+import blockRoutes from './routes/blockRoutes';
 
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
@@ -98,7 +112,8 @@ app.use('/api/visitors', visitorRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/mess', messRoutes);
 app.use('/api/settings', settingsRoutes);
-app.use('/api/fees', feeRoutes);
+app.use('/api/hostels', hostelRoutes);
+app.use('/api/blocks', blockRoutes);
 
 // Error Handling Middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {

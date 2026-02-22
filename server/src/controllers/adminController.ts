@@ -4,6 +4,8 @@ import User from '../models/User';
 import Room from '../models/Room';
 import Complaint from '../models/Complaint';
 import Allocation from '../models/Allocation';
+import Hostel from '../models/Hostel';
+import Block from '../models/Block';
 import mongoose from 'mongoose';
 
 // @desc    Get admin dashboard stats
@@ -25,18 +27,20 @@ export const getAdminStats = asyncHandler(async (req: Request, res: Response) =>
 
     const pendingComplaints = await Complaint.countDocuments({ status: 'pending' });
     const pendingAllocations = await Allocation.countDocuments({ status: 'pending' });
+    const totalHostels = await Hostel.countDocuments({});
 
-    // Block-wise occupancy
-    const blocks = [...new Set(rooms.map(r => r.block))].sort();
-    const blockStats = blocks.map(block => {
-        const blockRooms = rooms.filter(r => r.block === block);
+    // Block-wise occupancy (Enriched with Hostel info)
+    const blocks = await Block.find({}).populate('hostel', 'name');
+    const blockStats = await Promise.all(blocks.map(async (block) => {
+        const blockRooms = await Room.find({ block: block._id });
         const capacity = blockRooms.reduce((acc, r) => acc + r.capacity, 0);
         const occupants = blockRooms.reduce((acc, r) => acc + (r.occupants?.length || 0), 0);
         return {
-            block,
+            block: block.name,
+            hostel: (block.hostel as any)?.name,
             percentage: capacity > 0 ? Math.round((occupants / capacity) * 100) : 0
         };
-    });
+    }));
 
     // Complaint Resolution Time (Average hours)
     const resolvedComplaints = await Complaint.find({ status: 'resolved' }).select('createdAt updatedAt');
@@ -110,6 +114,7 @@ export const getAdminStats = asyncHandler(async (req: Request, res: Response) =>
 
     res.json({
         totalStudents,
+        totalHostels,
         occupancyRate,
         pendingComplaints,
         pendingAllocations,

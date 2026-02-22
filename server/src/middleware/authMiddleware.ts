@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import User, { IUser } from '../models/User';
+import Admin from '../models/Admin';
 
 export const protect = async (req: Request, res: Response, next: NextFunction) => {
     let token;
@@ -15,7 +16,15 @@ export const protect = async (req: Request, res: Response, next: NextFunction) =
 
             const decoded = jwt.verify(token, process.env.JWT_SECRET) as { id: string };
 
-            (req as any).user = await User.findById(decoded.id).select('-password');
+            // Check in Users collection
+            let user: any = await User.findById(decoded.id).select('-password');
+
+            // If not found, check in Admins collection
+            if (!user) {
+                user = await Admin.findById(decoded.id).select('-password');
+            }
+
+            (req as any).user = user;
 
             if (!(req as any).user) {
                 res.status(401);

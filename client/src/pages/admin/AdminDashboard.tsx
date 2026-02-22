@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Users, BedDouble, AlertCircle, Clock, TrendingUp, TrendingDown, Megaphone, Send, X, Activity, BarChart3, Clock3, Utensils, FileText, ShieldAlert } from 'lucide-react';
+import { Users, BedDouble, AlertCircle, Clock, TrendingUp, TrendingDown, Megaphone, Send, X, Activity, BarChart3, Utensils, FileText, ShieldAlert, Building2 } from 'lucide-react';
 import { useCreateAnnouncement } from '@/hooks/useCreateAnnouncement';
-import { useAdminStats, useAllAllocations, useAllComplaints, useUpdateAllocationStatus, useUpdateComplaintStatus } from '@/hooks/useAdmin';
+import { useAdminStats, useAllAllocations, useAllComplaints, useUpdateComplaintStatus } from '@/hooks/useAdmin';
 import { useRooms } from '@/hooks/useRooms';
 import toast from 'react-hot-toast';
 import {
@@ -42,7 +42,6 @@ const Dashboard = () => {
     const { data: rooms } = useRooms();
 
     const createAnnouncement = useCreateAnnouncement();
-    const updateAllocation = useUpdateAllocationStatus();
     const updateComplaint = useUpdateComplaintStatus();
 
     const handleBroadcast = async (e: React.FormEvent) => {
@@ -174,6 +173,15 @@ const Dashboard = () => {
                     trend="up"
                     icon={Users}
                     color="indigo"
+                    loading={isStatsLoading}
+                />
+                <KPICard
+                    title="Total Hostels"
+                    value={stats?.totalHostels?.toLocaleString() || '0'}
+                    change="Structure"
+                    trend="neutral"
+                    icon={Building2}
+                    color="emerald"
                     loading={isStatsLoading}
                 />
                 <KPICard

@@ -3,12 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
 import { useRooms } from '@/hooks/useRooms';
 import { useLockRoom, useRequestAllocation, useMyAllocation } from '@/hooks/useAllocation';
-import { useMyFees } from '@/hooks/useFees';
-import { Room, Fee } from '@/types';
+import { Room } from '@/types';
 import { motion } from 'framer-motion';
-import { Users, ShieldCheck, MapPin, Wind, Monitor, CheckCircle, Clock, AlertCircle, Lock, CreditCard, ExternalLink, History, CheckCircle2 } from 'lucide-react';
-import { format } from 'date-fns';
+import { Users, ShieldCheck, MapPin, Wind, Monitor, CheckCircle, Clock, AlertCircle, Lock } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { getImageUrl } from '@/utils/imageUtils';
 
 const MyRoom = () => {
     const { user, fetchProfile } = useAuthStore();
@@ -23,42 +22,23 @@ const MyRoom = () => {
 
     const { data: allRooms } = useRooms();
     const { data: rooms, isLoading: roomsLoading } = useRooms({
-        block: selectedBlock || undefined,
+        blockId: selectedBlock || undefined,
         isAC
     });
     const { mutate: lockRoom, isPending: locking } = useLockRoom();
     const { mutate: requestAllocation, isPending: requesting } = useRequestAllocation();
     const { data: myAllocations } = useMyAllocation();
-    const { data: fees, isLoading: feesLoading } = useMyFees();
 
-    const getStatusStyles = (status: Fee['status']) => {
-        switch (status) {
-            case 'paid':
-                return {
-                    container: 'bg-emerald-50 border-emerald-100',
-                    badge: 'bg-emerald-100 text-emerald-700',
-                    icon: <CheckCircle2 className="text-emerald-500" size={24} />,
-                    text: 'Paid'
-                };
-            case 'partially_paid':
-                return {
-                    container: 'bg-amber-50 border-amber-100',
-                    badge: 'bg-amber-100 text-amber-700',
-                    icon: <Clock className="text-amber-500" size={24} />,
-                    text: 'Partial'
-                };
-            default:
-                return {
-                    container: 'bg-rose-50 border-rose-100',
-                    badge: 'bg-rose-100 text-rose-700',
-                    icon: <AlertCircle className="text-rose-500" size={24} />,
-                    text: 'Due'
-                };
-        }
-    };
 
     // Derived blocks
-    const blocks = Array.from(new Set(allRooms?.map((r: any) => r.block) || [])).sort() as string[];
+    const blocks = Array.from(new Set(allRooms?.map((r: any) =>
+        typeof r.block === 'object' ? r.block._id : r.block
+    ) || [])).sort() as string[];
+
+    const getBlockName = (blockId: string) => {
+        const foundRoom = allRooms?.find((r: any) => (typeof r.block === 'object' ? r.block._id : r.block) === blockId);
+        return typeof (foundRoom?.block as any) === 'object' ? (foundRoom?.block as any).name : blockId;
+    };
 
     useEffect(() => {
         if (!selectedBlock && blocks.length > 0) {
@@ -114,7 +94,7 @@ const MyRoom = () => {
             onSuccess: () => {
                 toast.success('Allocation Request Sent Successfully!');
                 setLockedRoom(null);
-                fetchProfile(); // Refresh profile to see if status changed immediately (though likely pending)
+                fetchProfile();
             },
             onError: (err: any) => {
                 toast.error(err.response?.data?.message || 'Request failed');
@@ -130,24 +110,22 @@ const MyRoom = () => {
 
     // 1. Show Room Details if Allocated
     if (room && typeof room === 'object' && room.roomNumber) {
-        // Filter out current user from roommates
         const roommates = room.occupants?.filter((occ: any) => occ._id !== user?._id) || [];
 
         return (
             <div className="space-y-8 animate-in fade-in duration-500">
-                <div className="flex justify-between items-end">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div>
-                        <h1 className="text-2xl font-bold text-gray-900 capitalize">Room {room.roomNumber}</h1>
-                        <p className="text-gray-500">Block {room.block} • {room.type} Bed Layout</p>
+                        <h1 className="text-2xl font-bold text-gray-900 capitalize text-center sm:text-left w-full">Room {room.roomNumber}</h1>
+                        <p className="text-gray-500 text-center sm:text-left">Block {typeof room.block === 'object' ? room.block.name : room.block} • {room.type} Bed Layout</p>
                     </div>
-                    <div className={`px-4 py-1.5 rounded-full text-sm font-bold flex items-center gap-2 ${room.isAC ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-600'}`}>
+                    <div className={`w-full sm:w-auto px-4 py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-2 ${room.isAC ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-600'}`}>
                         <Wind size={16} />
                         {room.isAC ? 'AC Room' : 'Non-AC'}
                     </div>
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    {/* Room Details Card */}
                     <div className="lg:col-span-2 space-y-6">
                         <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
                             <h2 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
@@ -160,7 +138,7 @@ const MyRoom = () => {
                                     <MapPin className="text-indigo-500 mt-1" size={20} />
                                     <div>
                                         <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Location</p>
-                                        <p className="font-semibold text-gray-800">Block {room.block}, Floor {room.floor}</p>
+                                        <p className="font-semibold text-gray-800">Block {typeof room.block === 'object' ? room.block.name : room.block}, Floor {room.floor}</p>
                                     </div>
                                 </div>
                                 <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-xl border border-gray-100">
@@ -178,7 +156,6 @@ const MyRoom = () => {
                         </div>
                     </div>
 
-                    {/* Roommates Card */}
                     <div className="space-y-6">
                         <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
                             <h2 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
@@ -189,8 +166,16 @@ const MyRoom = () => {
                             <div className="space-y-4">
                                 {roommates.length > 0 ? roommates.map((mate: any) => (
                                     <div key={mate._id} className="flex items-center gap-4 p-3 hover:bg-gray-50 rounded-xl transition-colors border border-transparent hover:border-gray-100">
-                                        <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-700 font-bold">
-                                            {mate.name?.charAt(0)}
+                                        <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-700 font-bold overflow-hidden shadow-sm">
+                                            {mate.profile?.profileImage ? (
+                                                <img
+                                                    src={getImageUrl(mate.profile.profileImage)}
+                                                    alt={mate.name}
+                                                    className="w-full h-full object-cover"
+                                                />
+                                            ) : (
+                                                <span>{mate.name?.charAt(0)}</span>
+                                            )}
                                         </div>
                                         <div>
                                             <p className="font-bold text-gray-900 line-clamp-1">{mate.name}</p>
@@ -207,95 +192,6 @@ const MyRoom = () => {
                     </div>
                 </div>
 
-                {/* Fees & Payments Section */}
-                <div className="space-y-6">
-                    <div className="flex items-center justify-between">
-                        <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                            <CreditCard className="text-primary" size={24} />
-                            Room Charges & Fees
-                        </h2>
-                    </div>
-
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                        <div className="lg:col-span-2 space-y-4">
-                            {feesLoading ? (
-                                <div className="h-40 bg-gray-50 animate-pulse rounded-2xl" />
-                            ) : fees?.filter(f => f.status !== 'paid').length === 0 ? (
-                                <div className="bg-emerald-50 border border-emerald-100 p-8 rounded-2xl text-center">
-                                    <CheckCircle2 size={40} className="text-emerald-600 mx-auto mb-4" />
-                                    <h4 className="text-lg font-bold text-emerald-900">No Pending Dues</h4>
-                                    <p className="text-emerald-700">All your room and academic fees are cleared.</p>
-                                </div>
-                            ) : (
-                                fees?.filter(f => f.status !== 'paid').map((fee) => {
-                                    const styles = getStatusStyles(fee.status);
-                                    return (
-                                        <div key={fee._id} className="bg-white border border-gray-100 rounded-2xl p-4 sm:p-6 shadow-sm hover:shadow-md transition-shadow group">
-                                            <div className="flex flex-col sm:flex-row justify-between gap-6">
-                                                <div className="flex gap-4">
-                                                    <div className={`p-4 rounded-2xl h-fit hidden sm:block ${styles.container}`}>
-                                                        {styles.icon}
-                                                    </div>
-                                                    <div className="space-y-1">
-                                                        <div className="flex items-center flex-wrap gap-2">
-                                                            <h4 className="font-bold text-gray-900 text-lg">{fee.title}</h4>
-                                                            <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest ${styles.badge}`}>
-                                                                {styles.text}
-                                                            </span>
-                                                        </div>
-                                                        <p className="text-sm text-gray-500">{fee.description || `Applicable for room ${room.roomNumber}`}</p>
-                                                        <div className="flex items-center gap-4 mt-2">
-                                                            <span className="text-xs font-medium text-gray-400 flex items-center gap-1">
-                                                                <Clock size={12} /> Due: {format(new Date(fee.dueDate), 'MMM dd, yyyy')}
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-4 pt-4 sm:pt-0 border-t sm:border-t-0 border-gray-50">
-                                                    <div className="text-left sm:text-right">
-                                                        <div className="text-xl sm:text-2xl font-black text-gray-900 font-mono">₹{(fee.amount - fee.amountPaid).toLocaleString()}</div>
-                                                        {fee.amountPaid > 0 && <div className="text-[10px] text-emerald-600 font-medium">Paid: ₹{fee.amountPaid.toLocaleString()}</div>}
-                                                    </div>
-                                                    <a
-                                                        href={fee.paymentLink || "#"}
-                                                        target="_blank"
-                                                        className="flex items-center gap-2 px-6 py-2.5 bg-gray-900 text-white rounded-xl hover:bg-indigo-600 transition-all font-bold text-sm"
-                                                    >
-                                                        Pay Now
-                                                        <ExternalLink size={14} />
-                                                    </a>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    );
-                                })
-                            )}
-                        </div>
-
-                        {/* Recent Activity Mini-Widget */}
-                        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm h-fit">
-                            <h3 className="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2 uppercase tracking-wider">
-                                <History size={16} className="text-indigo-500" />
-                                Payment History
-                            </h3>
-                            <div className="space-y-4">
-                                {fees?.flatMap(f => f.transactionHistory).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 3).map((tx, idx) => (
-                                    <div key={idx} className="flex justify-between items-center pb-3 border-b border-gray-50 last:border-0 last:pb-0">
-                                        <div>
-                                            <p className="text-sm font-bold text-gray-900">₹{tx.amount.toLocaleString()}</p>
-                                            <p className="text-[10px] text-gray-400 uppercase font-black">{tx.paymentMethod}</p>
-                                        </div>
-                                        <p className="text-[10px] font-bold text-gray-500">{format(new Date(tx.date), 'MMM dd')}</p>
-                                    </div>
-                                ))}
-                                {fees?.flatMap(f => f.transactionHistory).length === 0 && (
-                                    <p className="text-xs text-gray-400 text-center py-4 italic">No history yet</p>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
         );
     }
@@ -335,8 +231,8 @@ const MyRoom = () => {
     // 3. Show Room Selection (Allocation) UI
     return (
         <div className="space-y-8 max-w-7xl mx-auto animate-in fade-in duration-500">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <div>
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                <div className="text-center md:text-left w-full md:w-auto">
                     <h1 className="text-2xl font-bold text-gray-900">Select Your Room</h1>
                     <p className="text-gray-500">Choose a block and room to request allocation.</p>
                 </div>
@@ -345,15 +241,17 @@ const MyRoom = () => {
                     <motion.div
                         initial={{ opacity: 0, y: -20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="bg-primary/10 border border-primary/20 px-6 py-3 rounded-xl flex items-center gap-4"
+                        className="w-full md:w-auto bg-primary/10 border border-primary/20 px-6 py-3 rounded-2xl flex items-center justify-between md:justify-start gap-4"
                     >
                         <div className="flex flex-col">
-                            <span className="text-xs font-bold text-primary uppercase tracking-wider">Locked Room</span>
-                            <span className="font-semibold text-gray-900">{lockedRoom.block}-{lockedRoom.roomNumber}</span>
+                            <span className="text-[10px] font-bold text-primary uppercase tracking-widest mb-0.5">Locked Room</span>
+                            <span className="font-bold text-gray-900">
+                                {typeof (lockedRoom.block as any) === 'object' ? (lockedRoom.block as any).name : lockedRoom.block}-{lockedRoom.roomNumber}
+                            </span>
                         </div>
-                        <div className="h-8 w-[1px] bg-primary/20"></div>
-                        <div className="flex items-center gap-2 text-primary font-mono text-xl font-bold">
-                            <Clock size={20} />
+                        <div className="h-8 w-[1px] bg-primary/20 hidden md:block"></div>
+                        <div className="flex items-center gap-2 text-primary font-mono text-xl font-bold bg-white/50 px-3 py-1 rounded-lg">
+                            <Clock size={18} />
                             {formatTime(timeLeft)}
                         </div>
                     </motion.div>
@@ -361,26 +259,26 @@ const MyRoom = () => {
             </div>
 
             {/* Filters */}
-            <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex flex-wrap gap-4 items-center">
-                <div className="flex gap-2 p-1 bg-gray-100/50 rounded-xl overflow-x-auto max-w-full">
+            <div className="bg-white p-3 sm:p-4 rounded-2xl border border-gray-100 shadow-sm flex flex-col sm:flex-row gap-4 sm:items-center">
+                <div className="flex gap-2 p-1 bg-gray-100/50 rounded-xl overflow-x-auto custom-scrollbar-hide pb-2 sm:pb-1">
                     {blocks.length > 0 ? blocks.map(block => (
                         <button
                             key={block}
                             onClick={() => setSelectedBlock(block)}
-                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${selectedBlock === block ? 'bg-white shadow-sm text-primary' : 'text-gray-500 hover:text-gray-700'}`}
+                            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap ${selectedBlock === block ? 'bg-white shadow-sm text-primary' : 'text-gray-500 hover:text-gray-900'}`}
                         >
-                            Block {block}
+                            Block {getBlockName(block)}
                         </button>
                     )) : (
                         <span className="px-4 py-2 text-sm text-gray-400">No blocks found</span>
                     )}
                 </div>
 
-                <div className="h-8 w-[1px] bg-gray-200 hidden md:block"></div>
+                <div className="h-8 w-[1px] bg-gray-200 hidden sm:block"></div>
 
                 <button
                     onClick={() => setIsAC(isAC === true ? undefined : true)}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all border ${isAC ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'}`}
+                    className={`flex items-center justify-center gap-2 px-6 py-3 sm:py-2 rounded-xl text-sm font-bold transition-all border ${isAC ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'}`}
                 >
                     <Wind size={16} className={isAC ? 'animate-spin-slow' : ''} />
                     {isAC ? 'AC Only' : 'All Rooms'}

@@ -3,15 +3,46 @@ import asyncHandler from 'express-async-handler';
 import Allocation from '../models/Allocation';
 import Room from '../models/Room';
 import User from '../models/User';
+import Hostel from '../models/Hostel';
 import { createNotification, notifyAdmins } from './notificationController';
 import { logAudit } from '../utils/auditLogger';
 
 // @desc    Create / Request room allocation
 // @route   POST /api/allocations
 // @access  Private (Student)
-export const requestAllocation = asyncHandler(async (req: Request, res: Response) => {
-    const { requestedBlock, requestedRoomType, requestType, reason, lockedRoomId } = req.body;
+export const requestAllocation = asyncHandler(async (req: any, res: Response) => {
+    const { hostel, block, room, reason } = req.body;
     const studentId = req.user._id;
+
+    // Check if gender matches hostel type
+    const student = await User.findById(studentId);
+    const targetHostel = await Hostel.findById(hostel);
+
+    if (!student || !targetHostel) {
+        res.status(404);
+        throw new Error('Student or Hostel not found');
+    }
+
+    const expectedType = student.profile?.gender === 'Male' ? 'BOYS' : 'GIRLS';
+    if (targetHostel.type !== expectedType) {
+        res.status(400);
+        throw new Error(`This hostel is for ${targetHostel.type.toLowerCase()} only. Your gender is ${student.profile?.gender}.`);
+    }
+
+    // Check if room is valid and available
+    const targetRoom = await Room.findById(room);
+    if (!targetRoom) {
+        res.status(404);
+        throw new Error('Room not found');
+    }
+    if (targetRoom.status === 'Maintenance' || targetRoom.status === 'maintenance') {
+        res.status(400);
+        throw new Error('Room is currently under maintenance');
+    }
+    if (targetRoom.occupants.length >= targetRoom.capacity) {
+        res.status(400);
+        throw new Error('Room is already full');
+    }
 
     // Check if pending request exists
     const pending = await Allocation.findOne({ student: studentId, status: 'pending' });
@@ -20,46 +51,19 @@ export const requestAllocation = asyncHandler(async (req: Request, res: Response
         throw new Error('You already have a pending allocation request');
     }
 
-    if (lockedRoomId) {
-        const room = await Room.findById(lockedRoomId);
-        if (!room) {
-            res.status(404);
-            throw new Error('Room not found');
-        }
-        // Validate lock ownership
-        if (room.status === 'locked') {
-            if (!room.lockedBy || room.lockedBy.toString() !== studentId.toString()) {
-                res.status(400);
-                throw new Error('You do not hold the lock for this room');
-            }
-            if (room.lockExpiresAt && new Date() > room.lockExpiresAt) {
-                res.status(400);
-                throw new Error('Room lock has expired');
-            }
-        } else {
-            // If room is not locked but requested as lockedRoomId, it might mean it was free or lock expired/cleared?
-            // Ideally we only allow if status is locked. But for resilience, if it's available, maybe we just proceed?
-            // User requirement: "System locks that bed... Admin approves...".
-            // So the room MUST be locked by the user.
-            // If status changed to something else (e.g. someone else took it, unlikely if locked correctly), fail.
-            res.status(400);
-            throw new Error('Room is not locked by you');
-        }
-    }
-
     // Create allocation request
     const allocation = await Allocation.create({
         student: studentId,
-        requestedBlock,
-        requestedRoomType: requestedRoomType || 'double',
-        requestType: requestType || 'initial',
-        reason,
-        lockedRoom: lockedRoomId
+        hostel,
+        block,
+        room,
+        requestType: 'initial',
+        reason
     });
 
     await notifyAdmins(
         'New Allocation Request',
-        `Student ${(req as any).user.name} requested a room allocation in Block ${requestedBlock}`,
+        `Student ${req.user.name} requested a room in ${targetHostel.name}`,
         'info'
     );
 
@@ -71,8 +75,9 @@ export const requestAllocation = asyncHandler(async (req: Request, res: Response
 // @access  Private (Student)
 export const getMyAllocations = asyncHandler(async (req: Request, res: Response) => {
     const allocations = await Allocation.find({ student: req.user._id })
-        .populate('lockedRoom', 'roomNumber block floor')
-        .populate('assignedRoom', 'roomNumber block floor')
+        .populate('hostel', 'name type')
+        .populate('block', 'name')
+        .populate('room', 'roomNumber block floor')
         .sort({ createdAt: -1 });
     res.json(allocations);
 });
@@ -87,8 +92,9 @@ export const getAllAllocations = asyncHandler(async (req: Request, res: Response
 
     const allocations = await Allocation.find(query)
         .populate('student', 'name email profile.studentId')
-        .populate('assignedRoom', 'roomNumber block floor')
-        .populate('lockedRoom', 'roomNumber block floor status') // See what they locked
+        .populate('hostel', 'name type')
+        .populate('block', 'name')
+        .populate('room', 'roomNumber block floor status')
         .sort({ createdAt: -1 });
 
     res.json(allocations);
@@ -98,7 +104,7 @@ export const getAllAllocations = asyncHandler(async (req: Request, res: Response
 // @route   PUT /api/allocations/:id/status
 // @access  Private (Admin)
 export const updateAllocationStatus = asyncHandler(async (req: Request, res: Response) => {
-    const { status, roomId, adminComment } = req.body;
+    const { status, adminComment } = req.body;
     const allocation = await Allocation.findById(req.params.id);
 
     if (!allocation) {
@@ -106,77 +112,49 @@ export const updateAllocationStatus = asyncHandler(async (req: Request, res: Res
         throw new Error('Allocation request not found');
     }
 
-    // If there was a locked room, we should unlock it now (either we use it or we release it)
-    if (allocation.lockedRoom) {
-        const lockedRoom = await Room.findById(allocation.lockedRoom);
-        if (lockedRoom && lockedRoom.status === 'locked') {
-            // Clear lock
-            lockedRoom.status = 'available'; // Default back to available, will be updated to full/occupied if assigned below
-            lockedRoom.lockedBy = undefined;
-            lockedRoom.lockExpiresAt = undefined;
-            await lockedRoom.save();
-        }
-    }
-
     if (status === 'approved') {
-        if (!roomId && !allocation.lockedRoom) {
-            res.status(400);
-            throw new Error('Please select a room to allocate');
-        }
-
-        const targetRoomId = roomId || allocation.lockedRoom;
-        const room = await Room.findById(targetRoomId);
+        const room = await Room.findById(allocation.room);
 
         if (!room) {
             res.status(404);
-            throw new Error('Room not found');
+            throw new Error('Requested room not found');
         }
 
-        if (room.occupants.length >= room.capacity) {
-            res.status(400);
-            throw new Error('Room is fully occupied');
-        }
-
-        if (room.status === 'maintenance') {
-            res.status(400);
-            throw new Error('Cannot allocate room under maintenance');
-        }
-
-        // Logic for handling swaps or changes
-        if (allocation.requestType === 'change' || allocation.requestType === 'swap') {
-            // Find current room and remove student
-            const currentRoom = await Room.findOne({ occupants: allocation.student });
-            if (currentRoom) {
-                currentRoom.occupants = currentRoom.occupants.filter(id => id.toString() !== allocation.student.toString());
-                // Update status if it was full
-                if (currentRoom.status === 'full') currentRoom.status = 'available';
-                await currentRoom.save();
+        // Atomic update to prevent overbooking
+        const updateResult = await Room.updateOne(
+            {
+                _id: allocation.room,
+                $expr: { $lt: [{ $size: "$occupants" }, "$capacity"] }
+            },
+            {
+                $push: { occupants: allocation.student },
             }
+        );
+
+        if (updateResult.modifiedCount === 0) {
+            res.status(400);
+            throw new Error('Room is already at full capacity');
         }
 
-        // Add student to new room
-        room.occupants.push(allocation.student);
-        // Check capacity
-        if (room.occupants.length >= room.capacity) {
-            room.status = 'full';
-        } else {
-            // If we just unlocked it above, it's 'available', which is correct for partial occupancy
-            room.status = 'available';
+        // After push, check if it's now full and update status
+        const updatedRoom = await Room.findById(allocation.room);
+        if (updatedRoom && updatedRoom.occupants.length >= updatedRoom.capacity) {
+            updatedRoom.status = 'Full';
+            await updatedRoom.save();
+        } else if (updatedRoom) {
+            updatedRoom.status = 'Available';
+            await updatedRoom.save();
         }
-
-        await room.save();
 
         // Update User profile
         const user = await User.findById(allocation.student);
         if (user) {
             user.profile = {
                 ...user.profile,
-                room: room._id
+                room: updatedRoom?._id
             };
             await user.save();
         }
-
-        allocation.assignedRoom = room._id;
     }
 
     allocation.status = status;
@@ -186,7 +164,7 @@ export const updateAllocationStatus = asyncHandler(async (req: Request, res: Res
     await createNotification(
         (allocation.student as any).toString(),
         `Room Allocation ${status.charAt(0).toUpperCase() + status.slice(1)}`,
-        `Your room allocation request for ${(allocation.requestedRoomType || 'room')} has been ${status}. ${adminComment ? `Comment: ${adminComment}` : ''}`,
+        `Your room allocation request has been ${status}. ${adminComment ? `Comment: ${adminComment}` : ''}`,
         status === 'approved' ? 'success' : 'alert'
     );
 

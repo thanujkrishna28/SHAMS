@@ -23,11 +23,12 @@ import SocketManager from './components/SocketManager';
 import Rooms from './pages/admin/Rooms';
 import AdminAllocations from './pages/admin/AdminAllocations';
 import AdminStudents from './pages/admin/AdminStudents';
-import AdminFees from './pages/admin/AdminFees';
+import AdminHostels from './pages/admin/AdminHostels';
 
 // Student Pages
 import StudentDashboard from './pages/student/StudentDashboard';
 import MyRoom from './pages/student/MyRoom';
+import RoomSelection from './pages/student/RoomSelection';
 import Complaints from './pages/student/Complaints';
 import Leave from './pages/student/Leave';
 import Profile from './pages/student/Profile';
@@ -76,6 +77,7 @@ function App() {
                 <Route path="dashboard" element={<StudentDashboard />} />
                 <Route path="profile" element={<Profile />} />
                 <Route path="room" element={<MyRoom />} />
+                <Route path="selection" element={<RoomSelection />} />
                 <Route path="attendance" element={<Attendance />} />
                 <Route path="mess" element={<Mess />} />
                 <Route path="leave" element={<Leave />} />
@@ -90,6 +92,7 @@ function App() {
               <Route path="/admin" element={<AdminLayout />}>
                 <Route index element={<Navigate to="/admin/dashboard" replace />} />
                 <Route path="dashboard" element={<AdminDashboard />} />
+                <Route path="hostels" element={<AdminHostels />} />
                 <Route path="students" element={<AdminStudents />} />
                 <Route path="rooms" element={<Rooms />} />
                 <Route path="allocations" element={<AdminAllocations />} />
@@ -97,7 +100,6 @@ function App() {
                 <Route path="leaves" element={<AdminLeaves />} />
                 <Route path="visitors" element={<Visitors />} />
                 <Route path="complaints" element={<AdminComplaints />} />
-                <Route path="fees" element={<AdminFees />} />
                 <Route path="settings" element={<AdminSettings />} />
                 <Route path="about" element={<AboutUs />} />
               </Route>
@@ -111,6 +113,7 @@ function App() {
                 <Route path="history" element={<SecurityHistory />} />
               </Route>
             </Route>
+
 
             {/* Root Redirect */}
             <Route path="/" element={<Navigate to="/login" replace />} />

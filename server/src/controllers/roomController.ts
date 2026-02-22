@@ -6,20 +6,27 @@ import Room, { IRoom } from '../models/Room';
 // @route   GET /api/rooms
 // @access  Private (Admin)
 export const getRooms = asyncHandler(async (req: Request, res: Response) => {
-    const { block, isAC } = req.query;
+    const { blockId, hostelId, isAC, status } = req.query;
 
     let query: any = {};
-    if (block) {
-        query.block = block as string;
+    if (blockId) {
+        query.block = blockId as string;
+    }
+    if (hostelId) {
+        query.hostel = hostelId as string;
     }
     if (isAC !== undefined && isAC !== '') {
         query.isAC = isAC === 'true';
     }
+    if (status) {
+        query.status = status as string;
+    }
 
-    // Lazy cleanup of expired locks could happen here, or we just trust the status.
-    // Ideally, we'd run a cleanup, but for this feature we will trust the lock logic.
-
-    const rooms = await Room.find(query).populate('occupants', 'name email profile.studentId').sort({ roomNumber: 1 });
+    const rooms = await Room.find(query)
+        .populate('occupants', 'name email profile.studentId')
+        .populate('block', 'name')
+        .populate('hostel', 'name type')
+        .sort({ roomNumber: 1 });
 
     res.json(rooms);
 });
@@ -42,22 +49,24 @@ export const getRoomById = asyncHandler(async (req: Request, res: Response) => {
 // @route   POST /api/rooms
 // @access  Private (Admin)
 export const createRoom = asyncHandler(async (req: Request, res: Response) => {
-    const { block, floor, roomNumber, capacity, type, isAC } = req.body;
+    const { hostel, block, floor, roomNumber, capacity, type, isAC } = req.body;
 
-    const roomExists = await Room.findOne({ roomNumber });
+    const roomExists = await Room.findOne({ roomNumber, hostel });
 
     if (roomExists) {
         res.status(400);
-        throw new Error('Room already exists');
+        throw new Error('Room already exists in this hostel');
     }
 
     const room = await Room.create({
+        hostel,
         block,
         floor,
         roomNumber,
         capacity,
         type,
-        isAC
+        isAC,
+        status: 'Available'
     });
 
     if (room) {
@@ -72,9 +81,9 @@ export const createRoom = asyncHandler(async (req: Request, res: Response) => {
 // @route   POST /api/rooms/bulk
 // @access  Private (Admin)
 export const createBulkRooms = asyncHandler(async (req: Request, res: Response) => {
-    const { block, floor, startRange, endRange, prefix, capacity, type, isAC } = req.body;
+    const { hostel, block, floor, startRange, endRange, prefix, capacity, type, isAC } = req.body;
 
-    if (!block || !floor || !startRange || !endRange) {
+    if (!hostel || !block || !floor || !startRange || !endRange) {
         res.status(400);
         throw new Error('Missing required fields for bulk creation');
     }
@@ -85,21 +94,22 @@ export const createBulkRooms = asyncHandler(async (req: Request, res: Response) 
     for (let i = startRange; i <= endRange; i++) {
         const roomNumber = `${prefix || ''}${i}`;
 
-        // Check if room exists
-        const exists = await Room.findOne({ roomNumber });
+        // Check if room exists in this hostel
+        const exists = await Room.findOne({ roomNumber, hostel });
         if (exists) {
             skippedRooms.push(roomNumber);
             continue;
         }
 
         roomsToCreate.push({
+            hostel,
             block,
             floor,
             roomNumber,
             capacity,
             type,
             isAC: !!isAC,
-            status: 'available'
+            status: 'Available'
         });
     }
 
@@ -116,6 +126,40 @@ export const createBulkRooms = asyncHandler(async (req: Request, res: Response) 
         skippedCount: skippedRooms.length,
         skippedRooms
     });
+});
+
+// @desc    Create smart batch rooms (manual list)
+// @route   POST /api/rooms/smart-batch
+// @access  Private (Admin)
+export const createSmartBatch = asyncHandler(async (req: Request, res: Response) => {
+    const { rooms } = req.body;
+
+    if (!rooms || !Array.isArray(rooms) || rooms.length === 0) {
+        res.status(400);
+        throw new Error('No rooms provided');
+    }
+
+    try {
+        const result = await Room.insertMany(rooms, { ordered: false });
+        res.status(201).json({
+            message: `Successfully created ${result.length} rooms.`,
+            createdCount: result.length
+        });
+    } catch (error: any) {
+        // If some operations failed (e.g. duplicates), Mongoose still inserts non-conflicting ones
+        // but throws a BulkWriteError.
+        if (error.name === 'BulkWriteError' || error.code === 11000) {
+            const insertedCount = error.insertedDocs?.length || 0;
+            res.status(201).json({
+                message: `Partial success: Created ${insertedCount} rooms. Some rooms were skipped as they already exist.`,
+                createdCount: insertedCount,
+                errorCount: (rooms.length - insertedCount)
+            });
+        } else {
+            res.status(400);
+            throw new Error(error.message || 'Batch creation failed');
+        }
+    }
 });
 
 // @desc    Update room details

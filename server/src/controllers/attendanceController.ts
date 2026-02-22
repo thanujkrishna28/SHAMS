@@ -5,6 +5,7 @@ import AttendanceLog from '../models/AttendanceLog';
 import UsedToken from '../models/UsedToken';
 import { generateShortToken } from '../utils/generateToken';
 import sendEmail from '../utils/sendEmail';
+import { getAttendanceEmail } from '../utils/emailTemplates';
 import jwt from 'jsonwebtoken';
 import { createNotification } from './notificationController';
 
@@ -132,10 +133,21 @@ export const scanQRCode = asyncHandler(async (req: any, res: Response) => {
 
     // Notify student via Email
     try {
+        const time = new Date().toLocaleString();
+        const status = newStatus ? 'IN HOSTEL' : 'OUTSIDE';
+        const html = getAttendanceEmail(
+            student.name,
+            newStatus ? 'entry' : 'exit',
+            time,
+            location || 'Main Gate',
+            status
+        );
+
         await sendEmail({
             email: student.email,
             subject: `Smart HMS: ${newStatus ? 'Entry' : 'Exit'} Recorded`,
-            message: `Hi ${student.name},\n\nYour ${newStatus ? 'entry' : 'exit'} at ${location || 'Main Gate'} was successful.\n\nTime: ${new Date().toLocaleString()}\nStatus: ${newStatus ? 'IN HOSTEL' : 'OUTSIDE'}`,
+            message: `Hi ${student.name}, Your ${newStatus ? 'entry' : 'exit'} at ${location || 'Main Gate'} was successful.`,
+            html
         });
     } catch (e) { }
 

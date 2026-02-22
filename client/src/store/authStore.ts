@@ -10,14 +10,22 @@ interface User {
     token: string;
     profile?: {
         studentId?: string;
+        gender?: 'Male' | 'Female';
+        branch?: string;
         room?: string;
         roomNumber?: string;
         block?: string;
         course?: string;
         year?: number;
         guardianContact?: string;
+        guardianContact2?: string;
         guardianName?: string;
+        relation?: string;
         address?: string;
+        phone?: string;
+        age?: number;
+        applicationNum?: string;
+        aadharNum?: string;
         idProof?: string;
         admissionLetter?: string;
         isVerified?: boolean;
@@ -25,6 +33,7 @@ interface User {
         attendancePercentage?: number;
         lastMovementAt?: string | Date;
         mealPreference?: 'Veg' | 'Non-Veg';
+        profileImage?: string;
     };
 }
 

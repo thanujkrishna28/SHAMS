@@ -4,12 +4,11 @@ import { IRoom } from './Room';
 
 export interface IAllocation extends Document {
     student: IUser['_id'];
-    requestedBlock: string;
-    requestedRoomType?: 'single' | 'double' | 'triple' | 'dorm';
+    hostel: mongoose.Types.ObjectId;
+    block: mongoose.Types.ObjectId;
+    room: mongoose.Types.ObjectId;
     requestType: 'initial' | 'change' | 'swap';
     reason?: string;
-    lockedRoom?: IRoom['_id'];
-    assignedRoom?: IRoom['_id'];
     status: 'pending' | 'approved' | 'rejected';
     adminComment?: string;
     createdAt: Date;
@@ -19,19 +18,15 @@ export interface IAllocation extends Document {
 const AllocationSchema: Schema = new Schema(
     {
         student: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-        requestedBlock: { type: String, required: true },
-        requestedRoomType: {
-            type: String,
-            enum: ['single', 'double', 'triple', 'dorm'],
-        },
+        hostel: { type: Schema.Types.ObjectId, ref: 'Hostel', required: true },
+        block: { type: Schema.Types.ObjectId, ref: 'Block', required: true },
+        room: { type: Schema.Types.ObjectId, ref: 'Room', required: true },
         requestType: {
             type: String,
             enum: ['initial', 'change', 'swap'],
             default: 'initial',
         },
         reason: { type: String },
-        lockedRoom: { type: Schema.Types.ObjectId, ref: 'Room' },
-        assignedRoom: { type: Schema.Types.ObjectId, ref: 'Room' },
         status: {
             type: String,
             enum: ['pending', 'approved', 'rejected'],

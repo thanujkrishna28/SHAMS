@@ -4,7 +4,7 @@ export const logAudit = async (
     adminId: string,
     action: string,
     targetId: string,
-    targetModel: 'User' | 'Room' | 'Allocation' | 'Complaint' | 'Leave' | 'Visitor' | 'Announcement' | 'Fee',
+    targetModel: 'User' | 'Room' | 'Allocation' | 'Complaint' | 'Leave' | 'Visitor' | 'Announcement',
     details: string = '',
     ipAddress: string = ''
 ) => {
@@ -22,3 +22,4 @@ export const logAudit = async (
         // We don't want to fail the main request if logging fails, just log the error
     }
 };
+

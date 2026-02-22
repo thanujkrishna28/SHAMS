@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Utensils, Star, Send, Clock, Info, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Utensils, Star, Send, Clock, Info, CheckCircle2 } from 'lucide-react';
 import { useMessMenu, useSubmitMessFeedback } from '@/hooks/useMess';
 import toast from 'react-hot-toast';
 
 const MessPage = () => {
-    const { data: menu, isLoading: menuLoading } = useMessMenu();
+    const { data: menu } = useMessMenu();
     const submitFeedback = useSubmitMessFeedback();
     const [rating, setRating] = useState(5);
     const [comment, setComment] = useState('');
@@ -40,8 +40,8 @@ const MessPage = () => {
             animate={{ opacity: 1, y: 0 }}
             className="space-y-8"
         >
-            <div className="flex justify-between items-end">
-                <div>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div className="text-center sm:text-left w-full sm:w-auto">
                     <h1 className="text-2xl font-bold text-gray-900">Mess & Dining</h1>
                     <p className="text-sm text-gray-500 mt-1">Weekly menu and feedback system</p>
                 </div>
@@ -158,8 +158,8 @@ const MessPage = () => {
                                 />
                             </div>
 
-                            <div className="flex items-center justify-between">
-                                <label className="flex items-center gap-2 cursor-pointer group">
+                            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                                <label className="flex items-center gap-2 cursor-pointer group w-full sm:w-auto">
                                     <input
                                         type="checkbox"
                                         className="w-4 h-4 text-emerald-600 rounded focus:ring-emerald-500"
@@ -169,7 +169,7 @@ const MessPage = () => {
                                     <span className="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">Submit Anonymously</span>
                                 </label>
                                 <button
-                                    className="px-6 py-2.5 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 shadow-lg shadow-emerald-200 transition-all flex items-center gap-2"
+                                    className="w-full sm:w-auto px-6 py-3 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 shadow-lg shadow-emerald-200 transition-all flex items-center justify-center gap-2"
                                     disabled={submitFeedback.isPending}
                                 >
                                     <Send size={18} />

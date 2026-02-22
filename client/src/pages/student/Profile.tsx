@@ -1,35 +1,43 @@
 import { useState } from 'react';
-import { Mail, Phone, Edit2, Shield, AlertTriangle, FileText, CheckCircle2, X, Home, BookOpen, User as UserIcon, MapPin } from 'lucide-react';
+import { Phone, Edit2, Shield, AlertTriangle, FileText, CheckCircle2, X, Home, BookOpen, User as UserIcon, MapPin, Users } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import QRCode from 'react-qr-code';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '@/api/axios';
 import toast from 'react-hot-toast';
+import { getImageUrl } from '@/utils/imageUtils';
 
 const Profile = () => {
     const { user, fetchProfile } = useAuthStore();
     const [isEditing, setIsEditing] = useState(false);
-    const [uploading, setUploading] = useState<'idProof' | 'admissionLetter' | null>(null);
+    const [uploading, setUploading] = useState<'idProof' | 'admissionLetter' | 'profileImage' | null>(null);
 
     // Form State
     const [formData, setFormData] = useState({
         studentId: user?.profile?.studentId || '',
         course: user?.profile?.course || '',
+        branch: user?.profile?.branch || '',
         year: user?.profile?.year || '',
         guardianName: user?.profile?.guardianName || '',
+        relation: user?.profile?.relation || '',
         guardianContact: user?.profile?.guardianContact || '',
+        guardianContact2: user?.profile?.guardianContact2 || '',
         address: user?.profile?.address || '',
+        phone: user?.profile?.phone || '',
+        age: user?.profile?.age || '',
+        applicationNum: user?.profile?.applicationNum || '',
+        aadharNum: user?.profile?.aadharNum || '',
     });
 
     // Use user.profile.room as the primary source of truth for current room
     const room: any = user?.profile?.room;
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'idProof' | 'admissionLetter') => {
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'idProof' | 'admissionLetter' | 'profileImage') => {
         const file = e.target.files?.[0];
         if (!file) return;
 
@@ -48,7 +56,7 @@ const Profile = () => {
                 [type]: filePath
             });
 
-            toast.success(`${type === 'idProof' ? 'ID Proof' : 'Admission Letter'} uploaded successfully!`);
+            toast.success(`${type === 'idProof' ? 'ID Proof' : type === 'admissionLetter' ? 'Admission Letter' : 'Profile Image'} uploaded successfully!`);
             fetchProfile(); // Refresh
         } catch (error: any) {
             toast.error(error.response?.data?.message || 'Upload failed');
@@ -80,15 +88,23 @@ const Profile = () => {
                 </div>
 
                 {/* Profile Card Overlay */}
-                <div className="absolute -bottom-20 left-4 md:left-8 flex flex-col md:flex-row items-center md:items-end gap-6 w-full md:w-auto">
+                <div className="absolute -bottom-20 left-4 md:left-8 flex flex-col md:flex-row items-center md:items-end gap-6 w-[calc(100%-2rem)] md:w-auto">
                     <div className="w-32 h-32 rounded-2xl bg-white p-1 shadow-xl relative group">
                         <img
-                            src={`https://ui-avatars.com/api/?name=${user?.name}&background=random&size=128`}
+                            src={getImageUrl(user?.profile?.profileImage)}
                             alt="Profile"
                             className="w-full h-full object-cover rounded-xl bg-gray-100"
                         />
+                        <label className="absolute inset-0 bg-black/40 text-white rounded-xl opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center cursor-pointer transition-all duration-300">
+                            <Edit2 size={24} className="mb-1" />
+                            <span className="text-[10px] font-bold uppercase">{uploading === 'profileImage' ? 'Uploading...' : 'Change'}</span>
+                            <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileUpload(e, 'profileImage')} disabled={!!uploading} />
+                        </label>
+                        {uploading === 'profileImage' && (
+                            <div className="absolute inset-x-0 bottom-0 h-1 bg-blue-500 animate-pulse rounded-full mx-2 mb-2"></div>
+                        )}
                     </div>
-                    <div className="pb-4 text-center md:text-left">
+                    <div className="pb-4 text-center md:text-left flex-1">
                         <div className="flex flex-col md:flex-row items-center gap-2 md:gap-3">
                             <h1 className="text-3xl font-bold text-gray-900">{user?.name}</h1>
                             {user?.profile?.isVerified ? (
@@ -105,24 +121,59 @@ const Profile = () => {
                         </div>
                         <p className="text-gray-500 font-medium">{user?.email}</p>
                     </div>
+
+                    <div className="hidden md:block pb-4">
+                        <button
+                            onClick={() => {
+                                setFormData({
+                                    studentId: user?.profile?.studentId || '',
+                                    course: user?.profile?.course || '',
+                                    branch: user?.profile?.branch || '',
+                                    year: user?.profile?.year || '',
+                                    guardianName: user?.profile?.guardianName || '',
+                                    relation: user?.profile?.relation || '',
+                                    guardianContact: user?.profile?.guardianContact || '',
+                                    guardianContact2: user?.profile?.guardianContact2 || '',
+                                    address: user?.profile?.address || '',
+                                    phone: user?.profile?.phone || '',
+                                    age: user?.profile?.age || '',
+                                    applicationNum: user?.profile?.applicationNum || '',
+                                    aadharNum: user?.profile?.aadharNum || '',
+                                });
+                                setIsEditing(true);
+                            }}
+                            className="px-4 py-2 bg-white text-gray-700 font-medium rounded-xl shadow-md hover:bg-gray-50 transition-colors flex items-center gap-2 text-sm border border-gray-100"
+                        >
+                            <Edit2 size={16} />
+                            Edit Profile
+                        </button>
+                    </div>
                 </div>
 
-                <div className="absolute top-4 right-4 md:-bottom-12 md:top-auto md:right-8">
+                {/* Mobile Edit Button */}
+                <div className="md:hidden flex justify-center mt-24">
                     <button
                         onClick={() => {
                             setFormData({
                                 studentId: user?.profile?.studentId || '',
                                 course: user?.profile?.course || '',
+                                branch: user?.profile?.branch || '',
                                 year: user?.profile?.year || '',
                                 guardianName: user?.profile?.guardianName || '',
+                                relation: user?.profile?.relation || '',
                                 guardianContact: user?.profile?.guardianContact || '',
+                                guardianContact2: user?.profile?.guardianContact2 || '',
                                 address: user?.profile?.address || '',
+                                phone: user?.profile?.phone || '',
+                                age: user?.profile?.age || '',
+                                applicationNum: user?.profile?.applicationNum || '',
+                                aadharNum: user?.profile?.aadharNum || '',
                             });
                             setIsEditing(true);
                         }}
-                        className="px-4 py-2 bg-white text-gray-700 font-medium rounded-xl shadow-md hover:bg-gray-50 transition-colors flex items-center gap-2 text-sm border border-gray-100"
+                        className="px-6 py-2.5 bg-white text-gray-700 font-bold rounded-2xl shadow-xl border border-gray-100 flex items-center gap-2 text-sm"
                     >
-                        <Edit2 size={16} />
+                        <Edit2 size={18} />
                         Edit Profile
                     </button>
                 </div>
@@ -139,19 +190,19 @@ const Profile = () => {
                         <div className="space-y-4">
                             <div className="flex items-center gap-3 text-gray-600">
                                 <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
-                                    <Mail size={16} />
+                                    <Phone size={16} />
                                 </div>
-                                <div className="flex-1 overflow-hidden">
-                                    <p className="text-xs text-gray-400 uppercase font-bold tracking-wider">Email</p>
-                                    <p className="text-sm font-medium truncate" title={user?.email}>{user?.email}</p>
+                                <div>
+                                    <p className="text-xs text-gray-400 uppercase font-bold tracking-wider">Phone</p>
+                                    <p className="text-sm font-medium">{user?.profile?.phone || 'N/A'}</p>
                                 </div>
                             </div>
                             <div className="flex items-center gap-3 text-gray-600">
                                 <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600">
-                                    <Phone size={16} />
+                                    <Users size={16} />
                                 </div>
                                 <div>
-                                    <p className="text-xs text-gray-400 uppercase font-bold tracking-wider">Guardian</p>
+                                    <p className="text-xs text-gray-400 uppercase font-bold tracking-wider">Guardian ({user?.profile?.relation || 'Guardian'})</p>
                                     <p className="text-sm font-medium">{user?.profile?.guardianName || 'N/A'}</p>
                                     <p className="text-xs text-gray-500">{user?.profile?.guardianContact || 'No Contact'}</p>
                                 </div>
@@ -171,7 +222,7 @@ const Profile = () => {
                                 </div>
                                 <div>
                                     <p className="text-xs text-gray-400 uppercase font-bold tracking-wider">Room</p>
-                                    <p className="text-sm font-medium">{room ? `${room.block}-${room.roomNumber}` : 'Not Allocated'}</p>
+                                    <p className="text-sm font-medium">{room ? `${typeof (room.block as any) === 'object' ? (room.block as any).name : room.block}-${room.roomNumber}` : 'Not Allocated'}</p>
                                 </div>
                             </div>
                         </div>
@@ -343,7 +394,7 @@ const Profile = () => {
                             initial={{ scale: 0.9, y: 20 }}
                             animate={{ scale: 1, y: 0 }}
                             exit={{ scale: 0.9, y: 20 }}
-                            className="bg-white rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden"
+                            className="bg-white rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden mt-auto mb-0 sm:mt-0 sm:mb-0 rounded-b-none sm:rounded-3xl"
                         >
                             <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
                                 <h2 className="text-xl font-bold text-gray-900">Edit Profile</h2>
@@ -355,7 +406,7 @@ const Profile = () => {
                                 </button>
                             </div>
 
-                            <div className="p-6 space-y-4 max-h-[75vh] overflow-y-auto custom-scrollbar">
+                            <div className="p-6 space-y-4 max-h-[80vh] sm:max-h-[75vh] overflow-y-auto custom-scrollbar">
                                 {/* Read Only Fields */}
                                 <div className="space-y-4 p-4 bg-gray-50 rounded-xl border border-gray-100 text-sm">
                                     <div className="flex items-center gap-2 text-amber-600 mb-2">
@@ -371,73 +422,89 @@ const Profile = () => {
                                             <label className="block text-xs font-medium text-gray-500 mb-1">Email Address</label>
                                             <input type="text" value={user?.email} disabled className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-gray-500" />
                                         </div>
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-500 mb-1">Phone Number</label>
+                                            <input type="text" value={user?.profile?.phone} disabled className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-gray-500 font-medium" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-500 mb-1">Student ID</label>
+                                            <input type="text" value={user?.profile?.studentId} disabled className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-gray-500 font-mono" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-500 mb-1">Guardian Name</label>
+                                            <input type="text" value={user?.profile?.guardianName} disabled className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-gray-500" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-500 mb-1">Guardian Contact</label>
+                                            <input type="text" value={user?.profile?.guardianContact} disabled className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-gray-500" />
+                                        </div>
                                     </div>
                                 </div>
 
                                 {/* Editable Fields */}
                                 <div className="space-y-4">
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Student ID No.</label>
-                                        <input
-                                            type="text"
-                                            name="studentId"
-                                            value={formData.studentId}
-                                            onChange={handleInputChange}
-                                            placeholder="e.g. 21BCE0001"
-                                            className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
-                                        />
-                                    </div>
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">Course / Branch</label>
-                                            <input
-                                                type="text"
-                                                name="course"
-                                                value={formData.course}
-                                                onChange={handleInputChange}
-                                                placeholder="e.g. B.Tech CSE"
-                                                className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
-                                            />
+                                            <label className="block text-sm font-medium text-gray-700 mb-1 text-xs">Phone (Read-Only)</label>
+                                            <input type="tel" name="phone" value={formData.phone} disabled className="w-full border border-gray-200 rounded-xl px-4 py-3 bg-gray-50 text-gray-400 outline-none transition-all cursor-not-allowed" />
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">Current Year</label>
-                                            <input
-                                                type="number"
-                                                name="year"
-                                                value={formData.year}
-                                                onChange={handleInputChange}
-                                                placeholder="1-4"
-                                                min="1"
-                                                max="5"
-                                                className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
-                                            />
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">Age</label>
+                                            <input type="number" name="age" value={formData.age} onChange={handleInputChange} className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all" />
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">Course</label>
+                                            <input type="text" name="course" value={formData.course} onChange={handleInputChange} placeholder="e.g. B.Tech" className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">Branch</label>
+                                            <input type="text" name="branch" value={formData.branch} onChange={handleInputChange} placeholder="e.g. CSE" className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all" />
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">Year of Study</label>
+                                            <select name="year" value={formData.year} onChange={handleInputChange} className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all">
+                                                <option value="">Select Year</option>
+                                                <option value="1">1st Year</option>
+                                                <option value="2">2nd Year</option>
+                                                <option value="3">3rd Year</option>
+                                                <option value="4">4th Year</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">Aadhar Number</label>
+                                            <input type="text" name="aadharNum" value={formData.aadharNum} onChange={handleInputChange} className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all" />
                                         </div>
                                     </div>
 
                                     <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Application Number</label>
+                                        <input type="text" name="applicationNum" value={formData.applicationNum} onChange={handleInputChange} className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all" />
+                                    </div>
+
+                                    <div>
                                         <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 mt-4">Guardian Details</h4>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1">Guardian Name</label>
-                                                <input
-                                                    type="text"
-                                                    name="guardianName"
-                                                    value={formData.guardianName}
-                                                    onChange={handleInputChange}
-                                                    placeholder="Parent/Guardian Name"
-                                                    className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
-                                                />
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="col-span-2">
+                                                <label className="block text-sm font-medium text-gray-700 mb-1 text-xs">Guardian Name (Read-Only)</label>
+                                                <input type="text" name="guardianName" value={formData.guardianName} disabled className="w-full border border-gray-200 rounded-xl px-4 py-3 bg-gray-50 text-gray-400 outline-none transition-all cursor-not-allowed" />
                                             </div>
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1">Contact Number</label>
-                                                <input
-                                                    type="tel"
-                                                    name="guardianContact"
-                                                    value={formData.guardianContact}
-                                                    onChange={handleInputChange}
-                                                    placeholder="Emergency Contact"
-                                                    className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
-                                                />
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">Relation</label>
+                                                <input type="text" name="relation" value={formData.relation} onChange={handleInputChange} className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all" />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1 text-xs">Contact 1 (Read-Only)</label>
+                                                <input type="tel" name="guardianContact" value={formData.guardianContact} disabled className="w-full border border-gray-200 rounded-xl px-4 py-3 bg-gray-50 text-gray-400 outline-none transition-all cursor-not-allowed" />
+                                            </div>
+                                            <div className="col-span-2">
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">Contact 2 (Alternative)</label>
+                                                <input type="tel" name="guardianContact2" value={formData.guardianContact2} onChange={handleInputChange} className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all" />
                                             </div>
                                         </div>
                                     </div>

@@ -1,8 +1,7 @@
 import { motion } from 'framer-motion';
-import { Bed, Users, Clock, AlertCircle, Bell, CheckCircle, Utensils, CreditCard, ArrowRight } from 'lucide-react';
+import { Bed, Users, Clock, AlertCircle, Bell, CheckCircle, Utensils } from 'lucide-react';
 import { useAnnouncements } from '@/hooks/useAnnouncements';
 import { useAuthStore } from '@/store/authStore';
-import { useMyFees } from '@/hooks/useFees';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import RequestChangeModal from '@/components/RequestChangeModal';
@@ -12,7 +11,6 @@ const StudentDashboard = () => {
     const { user, setMealPreference } = useAuthStore();
     const navigate = useNavigate();
     const { data: announcements, isLoading } = useAnnouncements();
-    const { data: fees } = useMyFees();
     const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
 
     const handleSetMealPreference = async (preference: 'Veg' | 'Non-Veg') => {
@@ -26,23 +24,27 @@ const StudentDashboard = () => {
     };
 
     const room: any = user?.profile?.room;
-    const totalDues = fees?.filter(f => f.status !== 'paid').reduce((acc, current) => acc + (current.amount - current.amountPaid), 0) || 0;
 
     const stats = [
-        { label: 'My Room', value: room ? `${room.block}-${room.roomNumber}` : 'N/A', icon: Bed, color: 'text-blue-600', bg: 'bg-blue-50' },
+        {
+            label: 'My Room',
+            value: room ? `${typeof (room.block as any) === 'object' ? (room.block as any).name : room.block}-${room.roomNumber}` : 'N/A',
+            icon: Bed,
+            color: 'text-blue-600',
+            bg: 'bg-blue-50'
+        },
         { label: 'Roommates', value: room?.occupants?.length > 1 ? (room.occupants.length - 1).toString() : '0', icon: Users, color: 'text-indigo-600', bg: 'bg-indigo-50' },
         { label: 'Status', value: user?.profile?.isInside ? 'On Campus' : 'Outside', icon: Clock, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-        { label: 'My Dues', value: `₹${totalDues.toLocaleString()}`, icon: CreditCard, color: totalDues > 0 ? 'text-rose-600' : 'text-emerald-600', bg: totalDues > 0 ? 'bg-rose-50' : 'bg-emerald-50' },
         { label: 'Verification', value: user?.profile?.isVerified ? 'Verified' : 'Pending', icon: AlertCircle, color: 'text-amber-600', bg: 'bg-amber-50' },
     ];
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <h1 className="text-2xl font-bold text-gray-900">Overview</h1>
                 <button
                     onClick={() => setIsRequestModalOpen(true)}
-                    className="px-4 py-2 bg-primary text-white text-sm font-medium rounded-xl shadow-lg hover:bg-primary-hover transition-all"
+                    className="w-full sm:w-auto px-4 py-2 bg-primary text-white text-sm font-medium rounded-xl shadow-lg hover:bg-primary-hover transition-all"
                 >
                     Request Room Change
                 </button>
@@ -102,16 +104,16 @@ const StudentDashboard = () => {
                                 <p className="text-sm text-indigo-700">Choose your preference to help us plan better. <span className="font-bold underline">This selection cannot be changed later.</span></p>
                             </div>
                         </div>
-                        <div className="flex gap-3">
+                        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto mt-4 sm:mt-0">
                             <button
                                 onClick={() => handleSetMealPreference('Veg')}
-                                className="px-6 py-2.5 bg-green-600 text-white font-bold rounded-xl shadow-lg shadow-green-200 hover:bg-green-700 transition-all active:scale-95"
+                                className="flex-1 sm:flex-none px-6 py-2.5 bg-green-600 text-white font-bold rounded-xl shadow-lg shadow-green-200 hover:bg-green-700 transition-all active:scale-95"
                             >
                                 Vegetarian
                             </button>
                             <button
                                 onClick={() => handleSetMealPreference('Non-Veg')}
-                                className="px-6 py-2.5 bg-red-600 text-white font-bold rounded-xl shadow-lg shadow-red-200 hover:bg-red-700 transition-all active:scale-95"
+                                className="flex-1 sm:flex-none px-6 py-2.5 bg-red-600 text-white font-bold rounded-xl shadow-lg shadow-red-200 hover:bg-red-700 transition-all active:scale-95"
                             >
                                 Non-Vegetarian
                             </button>
@@ -172,7 +174,9 @@ const StudentDashboard = () => {
                                     <Bed size={32} />
                                 </div>
                                 <h3 className="text-xl font-bold text-gray-900">Room {room.roomNumber}</h3>
-                                <p className="text-gray-500">Block {room.block} • {room.floor}th Floor • {room.type} Sharing</p>
+                                <p className="text-gray-500">
+                                    Block {typeof (room.block as any) === 'object' ? (room.block as any).name : room.block} • {room.floor}th Floor • {room.type} Sharing
+                                </p>
 
                                 <div className="mt-6 flex gap-3 flex-wrap justify-center">
                                     <div className="px-4 py-2 bg-white rounded-lg text-sm font-medium text-gray-600 shadow-sm border border-gray-100">

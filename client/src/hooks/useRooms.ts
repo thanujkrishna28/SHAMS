@@ -2,12 +2,13 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../api/axios';
 import { Room } from '../types';
 
-export const useRooms = (filters?: { block?: string; isAC?: boolean }) => {
+export const useRooms = (filters?: { blockId?: string; hostelId?: string; isAC?: boolean }) => {
     return useQuery({
         queryKey: ['rooms', filters],
         queryFn: async () => {
             const params: any = {};
-            if (filters?.block) params.block = filters.block;
+            if (filters?.blockId) params.blockId = filters.blockId;
+            if (filters?.hostelId) params.hostelId = filters.hostelId;
             if (typeof filters?.isAC === 'boolean') params.isAC = filters.isAC;
 
             const { data } = await api.get<Room[]>('/rooms', { params });
@@ -34,6 +35,19 @@ export const useBulkCreateRooms = () => {
     return useMutation({
         mutationFn: async (bulkData: any) => {
             const { data } = await api.post('/rooms/bulk', bulkData);
+            return data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['rooms'] });
+        },
+    });
+};
+
+export const useSmartBatchCreateRooms = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async (rooms: any[]) => {
+            const { data } = await api.post('/rooms/smart-batch', { rooms });
             return data;
         },
         onSuccess: () => {

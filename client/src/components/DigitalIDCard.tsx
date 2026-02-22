@@ -6,6 +6,8 @@ import api from '../api/axios';
 import { useAuthStore } from '../store/authStore';
 import { Loader2, RefreshCw, ShieldCheck, Wifi } from 'lucide-react';
 
+import { getImageUrl } from '../utils/imageUtils';
+
 interface QRCodeData {
     token: string;
     validUntil: string;
@@ -74,7 +76,7 @@ const DigitalIDCard = () => {
                             <div className="w-32 h-32 rounded-full p-1 bg-gradient-to-tr from-emerald-400 to-indigo-500 shadow-lg mb-4 relative group">
                                 <div className="w-full h-full rounded-full overflow-hidden border-4 border-slate-900 bg-slate-800">
                                     <img
-                                        src={`https://ui-avatars.com/api/?name=${user?.name}&background=random&size=256`}
+                                        src={getImageUrl(user?.profile?.profileImage)}
                                         alt="Profile"
                                         className="w-full h-full object-cover"
                                     />
