@@ -24,6 +24,16 @@ const loginSchema = z.object({
 // @route   POST /api/auth/register
 // @access  Public
 export const registerUser = asyncHandler(async (req: Request, res: Response) => {
+    console.log('Register request body:', { ...req.body, password: '***' });
+
+    // Validate with Zod
+    const validation = registerSchema.safeParse(req.body);
+    if (!validation.success) {
+        console.error('Zod Validation failed:', validation.error.format());
+        res.status(400);
+        throw new Error(`Validation Error: ${validation.error.issues.map(i => `${i.path.join('.')}: ${i.message}`).join(', ')}`);
+    }
+
     const {
         name, email, password, role,
         gender, phone, address, age,
@@ -34,57 +44,67 @@ export const registerUser = asyncHandler(async (req: Request, res: Response) => 
     const userExists = await User.findOne({ email });
 
     if (userExists) {
+        console.warn(`Registration failed: User already exists with email ${email}`);
         res.status(400);
         throw new Error('User already exists');
     }
 
-    const user = await User.create({
-        name,
-        email,
-        password,
-        role: role || 'student', // Default to student
-        profile: {
-            gender,
-            phone,
-            address,
-            age: age ? parseInt(age) : undefined,
-            guardianName,
-            relation,
-            guardianContact,
-            guardianContact2,
-            course,
-            branch,
-            year: year ? parseInt(year) : undefined,
-            applicationNum,
-            aadharNum,
-        }
-    });
-
-    if (user) {
-        // Send Welcome Email
-        try {
-            const html = getWelcomeEmail(user.name);
-            await sendEmail({
-                email: user.email,
-                subject: 'Welcome to Smart HMS',
-                message: `Hi ${user.name}, Welcome to Smart HMS! Your account has been created successfully.`,
-                html
-            });
-        } catch (error) {
-            console.error('Email send failed:', error);
-        }
-
-        res.status(201).json({
-            _id: user._id,
-            name: user.name,
-            email: user.email,
-            role: user.role,
-            profile: user.profile,
-            token: generateToken(user._id as unknown as string),
+    try {
+        const user = await User.create({
+            name,
+            email,
+            password,
+            role: role || 'student', // Default to student
+            profile: {
+                studentId,
+                gender,
+                phone,
+                address,
+                age: age ? parseInt(age) : undefined,
+                guardianName,
+                relation,
+                guardianContact,
+                guardianContact2,
+                course,
+                branch,
+                year: year ? parseInt(year) : undefined,
+                applicationNum,
+                aadharNum,
+            }
         });
-    } else {
+
+        if (user) {
+            console.log(`User created: ${user.email} (${user.role})`);
+            // Send Welcome Email
+            try {
+                const html = getWelcomeEmail(user.name);
+                await sendEmail({
+                    email: user.email,
+                    subject: 'Welcome to Smart HMS',
+                    message: `Hi ${user.name}, Welcome to Smart HMS! Your account has been created successfully.`,
+                    html
+                });
+            } catch (error) {
+                console.error('Email send failed:', error);
+            }
+
+            res.status(201).json({
+                _id: user._id,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                profile: user.profile,
+                token: generateToken(user._id as unknown as string),
+            });
+        }
+    } catch (error: any) {
+        console.error('Mongoose Registration Error:', error);
         res.status(400);
-        throw new Error('Invalid user data');
+        if (error.code === 11000) {
+            const field = Object.keys(error.keyPattern)[0];
+            throw new Error(`${field === 'email' ? 'Email' : field} already in use`);
+        }
+        throw new Error(error.message || 'Invalid user data');
     }
 });
 
