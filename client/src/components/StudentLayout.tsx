@@ -4,10 +4,6 @@ import { useAuthStore } from '../store/authStore';
 import { getImageUrl } from '@/utils/imageUtils';
 import {
     LayoutDashboard,
-    Bed,
-    MessageSquare,
-    CalendarDays,
-    Clock,
     User,
     LogOut,
     Bell,
@@ -15,11 +11,8 @@ import {
     Menu,
     X,
     ChevronRight,
-    Utensils,
     Info,
-    UserPlus,
-    Building,
-    CreditCard
+    Grip
 } from 'lucide-react';
 
 import { motion, AnimatePresence } from 'framer-motion';
@@ -47,16 +40,8 @@ const StudentLayout = () => {
 
     const navItems = [
         { name: 'Dashboard', path: '/student/dashboard', icon: LayoutDashboard },
+        { name: 'Services', path: '/student/services', icon: Grip },
         { name: 'Profile', path: '/student/profile', icon: User },
-        { name: 'My Room', path: '/student/room', icon: Bed },
-        { name: 'Find Room', path: '/student/selection', icon: Building },
-        { name: 'Attendance', path: '/student/attendance', icon: Clock },
-        { name: 'Mess', path: '/student/mess', icon: Utensils },
-        { name: 'Fees', path: '/student/fees', icon: CreditCard },
-        { name: 'Leave', path: '/student/leave', icon: CalendarDays },
-
-        { name: 'Visitors', path: '/student/visitors', icon: UserPlus },
-        { name: 'Complaints', path: '/student/complaints', icon: MessageSquare },
         { name: 'About', path: '/student/about', icon: Info },
     ];
 
@@ -209,7 +194,7 @@ const StudentLayout = () => {
                             exit={{ y: 100 }}
                             className="lg:hidden fixed bottom-0 left-0 right-0 bg-surface/90 backdrop-blur-lg border-t border-border px-4 py-2 flex items-center justify-around z-40 shadow-up"
                         >
-                            {navItems.slice(0, 5).map((item) => {
+                            {navItems.map((item) => {
                                 const isActive = location.pathname === item.path;
                                 return (
                                     <NavLink

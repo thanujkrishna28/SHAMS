@@ -3,10 +3,6 @@ import { NavLink, useNavigate, useLocation, Outlet } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import {
     LayoutDashboard,
-    Users,
-    MessageSquare,
-    CalendarDays,
-    Settings,
     LogOut,
     Bell,
     Search,
@@ -14,14 +10,9 @@ import {
     X,
     ChevronRight,
     Shield,
-    ShieldCheck,
-    Utensils,
-    Info,
-    ClipboardCheck,
-    Bed,
-    Building2,
-    Scan,
-    CreditCard
+    Grip,
+    Settings,
+    Info
 } from 'lucide-react';
 
 import { motion, AnimatePresence } from 'framer-motion';
@@ -45,17 +36,7 @@ const AdminLayout = () => {
 
     const navItems = [
         { name: 'Dashboard', path: '/admin/dashboard', icon: LayoutDashboard },
-        { name: 'Hostels', path: '/admin/hostels', icon: Building2 },
-        { name: 'Students', path: '/admin/students', icon: Users },
-        { name: 'Rooms', path: '/admin/rooms', icon: Bed },
-        { name: 'Allocations', path: '/admin/allocations', icon: ClipboardCheck },
-        { name: 'Mess', path: '/admin/mess', icon: Utensils },
-        { name: 'Fees', path: '/admin/fees', icon: CreditCard },
-        { name: 'Leaves', path: '/admin/leaves', icon: CalendarDays },
-
-        { name: 'Visitors', path: '/admin/visitors', icon: ShieldCheck },
-        { name: 'Complaints', path: '/admin/complaints', icon: MessageSquare },
-        { name: 'Scanner', path: '/admin/scanner', icon: Scan },
+        { name: 'Services', path: '/admin/services', icon: Grip },
         { name: 'Settings', path: '/admin/settings', icon: Settings },
         { name: 'About', path: '/admin/about', icon: Info },
     ];

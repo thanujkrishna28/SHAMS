@@ -8,12 +8,12 @@ import {
     Bell,
     Menu,
     X,
+    Package,
 } from 'lucide-react';
 
 const SecurityLayout = () => {
     const { user, logout } = useAuthStore();
     const navigate = useNavigate();
-    const location = useLocation();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
 
     const handleLogout = () => {
@@ -24,6 +24,7 @@ const SecurityLayout = () => {
     const navItems = [
         { name: 'QR Scanner', path: '/security/scanner', icon: Shield },
         { name: 'Scan History', path: '/security/history', icon: History },
+        { name: 'Parcels', path: '/security/parcels', icon: Package },
     ];
 
     return (

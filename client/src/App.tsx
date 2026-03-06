@@ -24,9 +24,11 @@ import Rooms from './pages/admin/Rooms';
 import AdminAllocations from './pages/admin/AdminAllocations';
 import AdminStudents from './pages/admin/AdminStudents';
 import AdminHostels from './pages/admin/AdminHostels';
+import AdminServices from './pages/admin/AdminServices';
 
 // Student Pages
 import StudentDashboard from './pages/student/StudentDashboard';
+import Services from './pages/student/Services';
 import MyRoom from './pages/student/MyRoom';
 import RoomSelection from './pages/student/RoomSelection';
 import Complaints from './pages/student/Complaints';
@@ -36,6 +38,7 @@ import Attendance from './pages/student/Attendance';
 
 // Security Pages
 import SecurityScanner from './pages/security/SecurityScanner';
+import ParcelManagement from './pages/security/ParcelManagement';
 
 import AdminComplaints from './pages/admin/AdminComplaints';
 import AdminLeaves from './pages/admin/AdminLeaves';
@@ -45,7 +48,10 @@ import AdminMess from './pages/admin/AdminMess';
 import AdminFees from './pages/admin/AdminFees';
 import Mess from './pages/student/Mess';
 import StudentFees from './pages/student/StudentFees';
+import StudentParcels from './pages/student/StudentParcels';
 import StudentVisitors from './pages/student/Visitors';
+import LaundryManagement from './pages/student/LaundryManagement';
+import LostFound from './pages/student/LostFound';
 import AboutUs from './pages/AboutUs';
 import PaymentProcessing from './pages/payment/PaymentProcessing';
 import PaymentSimulator from './pages/student/PaymentSimulator';
@@ -80,10 +86,13 @@ function App() {
               <Route path="/student" element={<SystemGuard><StudentLayout /></SystemGuard>}>
                 <Route index element={<Navigate to="/student/dashboard" replace />} />
                 <Route path="dashboard" element={<StudentDashboard />} />
+                <Route path="services" element={<Services />} />
                 <Route path="profile" element={<Profile />} />
                 <Route path="room" element={<MyRoom />} />
                 <Route path="selection" element={<RoomSelection />} />
                 <Route path="attendance" element={<Attendance />} />
+                <Route path="laundry" element={<LaundryManagement />} />
+                <Route path="lost-found" element={<LostFound />} />
                 <Route path="mess" element={<Mess />} />
                 <Route path="fees" element={<StudentFees />} />
                 <Route path="payment-simulator" element={<PaymentSimulator />} />
@@ -91,6 +100,7 @@ function App() {
                 <Route path="leave" element={<Leave />} />
 
                 <Route path="visitors" element={<StudentVisitors />} />
+                <Route path="parcels" element={<StudentParcels />} />
                 <Route path="complaints" element={<Complaints />} />
                 <Route path="about" element={<AboutUs />} />
               </Route>
@@ -107,6 +117,7 @@ function App() {
               <Route path="/admin" element={<AdminLayout />}>
                 <Route index element={<Navigate to="/admin/dashboard" replace />} />
                 <Route path="dashboard" element={<AdminDashboard />} />
+                <Route path="services" element={<AdminServices />} />
                 <Route path="hostels" element={<AdminHostels />} />
                 <Route path="students" element={<AdminStudents />} />
                 <Route path="rooms" element={<Rooms />} />
@@ -129,6 +140,7 @@ function App() {
                 <Route index element={<Navigate to="/security/scanner" replace />} />
                 <Route path="scanner" element={<SecurityScanner />} />
                 <Route path="history" element={<SecurityHistory />} />
+                <Route path="parcels" element={<ParcelManagement />} />
               </Route>
             </Route>
 

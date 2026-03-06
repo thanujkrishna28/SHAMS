@@ -25,6 +25,9 @@ import settingsRoutes from './routes/settingsRoutes';
 import hostelRoutes from './routes/hostelRoutes';
 import blockRoutes from './routes/blockRoutes';
 import paymentRoutes from './routes/paymentRoutes';
+import parcelRoutes from './routes/parcelRoutes';
+import laundryRoutes from './routes/laundryRoutes';
+import lostFoundRoutes from './routes/lostFoundRoutes';
 
 const app = express();
 
@@ -121,6 +124,9 @@ app.use('/api/hostels', hostelRoutes);
 app.use('/api/blocks', blockRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/fees', paymentRoutes);
+app.use('/api/parcels', parcelRoutes);
+app.use('/api/laundry', laundryRoutes);
+app.use('/api/lost-found', lostFoundRoutes);
 
 // Error Handling Middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
