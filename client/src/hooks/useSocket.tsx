@@ -3,8 +3,9 @@ import { io, Socket } from 'socket.io-client';
 import { useAuthStore } from '../store/authStore';
 import toast from 'react-hot-toast';
 
-// Use host instead of hostname to includes port if necessary, but here we explicitly use 5000
-const SOCKET_URL = `http://${window.location.hostname}:5000`;
+// Dynamically set socket URL based on API URL or fallback
+const API_URL = import.meta.env.VITE_API_BASE_URL || `http://${window.location.hostname}:5000/api`;
+const SOCKET_URL = API_URL.replace(/\/api$/, '');
 
 // Robust notification sound (Standard ping)
 const SOUND_URL = 'https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3';
