@@ -205,37 +205,83 @@ export const deleteRoom = asyncHandler(async (req: Request, res: Response) => {
     }
 });
 
-// @desc    Lock a room for allocation
+// @desc    Lock a room for allocation (Atomic)
 // @route   POST /api/rooms/:id/lock
 // @access  Private (Student)
 export const lockRoom = asyncHandler(async (req: any, res: Response) => {
-    const room = await Room.findById(req.params.id);
-    if (!room) {
-        res.status(404);
-        throw new Error('Room not found');
-    }
+    const roomId = req.params.id;
+    const userId = req.user._id;
 
-    // Check if locked and valid
-    if (room.status === 'locked' && room.lockExpiresAt && room.lockExpiresAt > new Date()) {
-        const lockedById = room.lockedBy ? room.lockedBy.toString() : '';
-        if (lockedById === req.user._id.toString()) {
-            res.json({ message: 'Room already locked by you', room });
-            return;
+    // A room is "available for locking" if:
+    // 1. It is not locked
+    // 2. OR its existing lock has expired
+    // 3. OR it is locked by the CURRENT user (to renew/extend)
+    // AND it has capacity
+
+    const now = new Date();
+    const tenMinutesFromNow = new Date(now.getTime() + 10 * 60 * 1000);
+
+    const room = await Room.findOneAndUpdate(
+        {
+            _id: roomId,
+            $or: [
+                { status: { $ne: 'locked' } },
+                { lockExpiresAt: { $lt: now } },
+                { lockedBy: userId }
+            ],
+            $expr: { $lt: [{ $size: "$occupants" }, "$capacity"] }
+        },
+        {
+            $set: {
+                status: 'locked',
+                lockedBy: userId,
+                lockExpiresAt: tenMinutesFromNow
+            }
+        },
+        { new: true }
+    );
+
+    if (!room) {
+        // Find why it failed to give a clear message
+        const targetRoom = await Room.findById(roomId);
+        if (!targetRoom) {
+            res.status(404);
+            throw new Error('Room not found');
+        }
+        if (targetRoom.occupants.length >= targetRoom.capacity) {
+            res.status(400);
+            throw new Error('Room is currently full');
         }
         res.status(400);
-        throw new Error('Room is currently locked by another student');
+        throw new Error('Room is currently reserved by another student. Please try again in a few minutes.');
     }
 
-    // Check if full
-    if (room.occupants.length >= room.capacity) {
+    res.json({
+        message: 'Room reserved for 10 minutes',
+        room
+    });
+});
+
+// @desc    Unlock a room (Manual release)
+// @route   POST /api/rooms/:id/unlock
+// @access  Private (Student)
+export const unlockRoom = asyncHandler(async (req: any, res: Response) => {
+    const room = await Room.findOneAndUpdate(
+        {
+            _id: req.params.id,
+            lockedBy: req.user._id
+        },
+        {
+            $set: { status: 'Available' },
+            $unset: { lockedBy: "", lockExpiresAt: "" }
+        },
+        { new: true }
+    );
+
+    if (!room) {
         res.status(400);
-        throw new Error('Room is full');
+        throw new Error('You do not have a reservation on this room');
     }
 
-    room.status = 'locked';
-    room.lockedBy = req.user._id;
-    room.lockExpiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
-    await room.save();
-
-    res.json(room);
+    res.json({ message: 'Reservation released', room });
 });

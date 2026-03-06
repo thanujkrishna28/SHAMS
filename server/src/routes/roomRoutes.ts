@@ -8,7 +8,8 @@ import {
     createSmartBatch,
     updateRoom,
     deleteRoom,
-    lockRoom
+    lockRoom,
+    unlockRoom
 } from '../controllers/roomController';
 
 const router = express.Router();
@@ -26,5 +27,6 @@ router.route('/:id')
     .delete(protect, authorize('admin'), deleteRoom);
 
 router.post('/:id/lock', protect, lockRoom);
+router.post('/:id/unlock', protect, unlockRoom);
 
 export default router;

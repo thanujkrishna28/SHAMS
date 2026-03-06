@@ -184,13 +184,27 @@ const RoomSelection = () => {
                             {rooms?.map((room: any) => {
                                 const isFull = room.occupants.length >= room.capacity;
                                 const isMaintenance = room.status === 'Maintenance' || room.status === 'maintenance';
-                                const isDisabled = isFull || isMaintenance;
+                                const isLockedByOther = room.status === 'locked' &&
+                                    room.lockedBy !== user?._id &&
+                                    new Date(room.lockExpiresAt) > new Date();
+                                const isDisabled = isFull || isMaintenance || isLockedByOther;
 
                                 return (
                                     <motion.div
                                         key={room._id}
                                         whileHover={!isDisabled ? { scale: 1.05, y: -2 } : {}}
-                                        onClick={() => { if (!isDisabled) { setSelectedRoom(room); setStep(4); } }}
+                                        onClick={async () => {
+                                            if (!isDisabled) {
+                                                try {
+                                                    // Try to lock the room
+                                                    await api.post(`/rooms/${room._id}/lock`);
+                                                    setSelectedRoom(room);
+                                                    setStep(4);
+                                                } catch (err: any) {
+                                                    toast.error(err.response?.data?.message || 'Failed to reserve room');
+                                                }
+                                            }
+                                        }}
                                         className={`
                                             p-4 rounded-xl border-2 transition-all cursor-pointer relative
                                             ${isDisabled ? 'bg-gray-50 border-gray-100 grayscale' : 'bg-white border-gray-100 hover:border-secondary hover:shadow-md shadow-sm'}
@@ -206,8 +220,8 @@ const RoomSelection = () => {
                                                 ))}
                                             </div>
 
-                                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-widest ${isMaintenance ? 'bg-amber-100 text-amber-600' : isFull ? 'bg-red-100 text-red-600' : 'bg-emerald-100 text-emerald-600'}`}>
-                                                {isMaintenance ? 'Maint' : isFull ? 'Full' : 'Select'}
+                                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-widest ${isMaintenance ? 'bg-amber-100 text-amber-600' : isFull ? 'bg-red-100 text-red-600' : isLockedByOther ? 'bg-purple-100 text-purple-600' : 'bg-emerald-100 text-emerald-600'}`}>
+                                                {isMaintenance ? 'Maint' : isFull ? 'Full' : isLockedByOther ? 'Reserved' : 'Select'}
                                             </span>
                                         </div>
                                         <div className="absolute top-1 right-1">
@@ -229,7 +243,10 @@ const RoomSelection = () => {
                                     <Building2 size={120} />
                                 </div>
                                 <h3 className="text-2xl font-bold mb-2">Confirmation Details</h3>
-                                <p className="text-indigo-100 text-sm">Review your room selection before submitting</p>
+                                <div className="flex items-center gap-2 text-indigo-100 text-sm">
+                                    <Clock size={16} />
+                                    <span>Room reserved for you for the next 10 minutes</span>
+                                </div>
                             </div>
 
                             <div className="p-8 space-y-6">
@@ -263,7 +280,12 @@ const RoomSelection = () => {
 
                                 <div className="flex gap-4 pt-4">
                                     <button
-                                        onClick={() => setStep(3)}
+                                        onClick={async () => {
+                                            try {
+                                                if (selectedRoom) await api.post(`/rooms/${selectedRoom._id}/unlock`);
+                                            } catch (e) { /* Ignore error on unlock if failed */ }
+                                            setStep(3);
+                                        }}
                                         className="flex-1 py-4 bg-gray-50 text-gray-600 rounded-2xl font-bold hover:bg-gray-100 transition-all"
                                     >
                                         Change Room

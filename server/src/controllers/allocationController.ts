@@ -44,6 +44,14 @@ export const requestAllocation = asyncHandler(async (req: any, res: Response) =>
         throw new Error('Room is already full');
     }
 
+    // Check if room is locked by another student
+    if (targetRoom.status === 'locked' && targetRoom.lockExpiresAt && targetRoom.lockExpiresAt > new Date()) {
+        if (targetRoom.lockedBy && targetRoom.lockedBy.toString() !== studentId.toString()) {
+            res.status(400);
+            throw new Error('Room is recently reserved by another student. Please try again soon.');
+        }
+    }
+
     // Check if pending request exists
     const pending = await Allocation.findOne({ student: studentId, status: 'pending' });
     if (pending) {
