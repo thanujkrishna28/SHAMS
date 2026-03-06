@@ -42,9 +42,14 @@ import AdminLeaves from './pages/admin/AdminLeaves';
 import AdminSettings from './pages/admin/AdminSettings';
 import Visitors from './pages/admin/Visitors';
 import AdminMess from './pages/admin/AdminMess';
+import AdminFees from './pages/admin/AdminFees';
 import Mess from './pages/student/Mess';
+import StudentFees from './pages/student/StudentFees';
 import StudentVisitors from './pages/student/Visitors';
 import AboutUs from './pages/AboutUs';
+import PaymentProcessing from './pages/payment/PaymentProcessing';
+import PaymentSimulator from './pages/student/PaymentSimulator';
+
 
 // Security Placeholder
 const SecurityHistory = () => <div className="p-6">Scan History & Audit Logs</div>;
@@ -80,12 +85,22 @@ function App() {
                 <Route path="selection" element={<RoomSelection />} />
                 <Route path="attendance" element={<Attendance />} />
                 <Route path="mess" element={<Mess />} />
+                <Route path="fees" element={<StudentFees />} />
+                <Route path="payment-simulator" element={<PaymentSimulator />} />
+
                 <Route path="leave" element={<Leave />} />
+
                 <Route path="visitors" element={<StudentVisitors />} />
                 <Route path="complaints" element={<Complaints />} />
                 <Route path="about" element={<AboutUs />} />
               </Route>
             </Route>
+
+            {/* Payment Processing Route */}
+            <Route element={<ProtectedRoute allowedRoles={['student']} />}>
+              <Route path="/payment-processing" element={<PaymentProcessing />} />
+            </Route>
+
 
             {/* Admin Routes */}
             <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
@@ -97,7 +112,9 @@ function App() {
                 <Route path="rooms" element={<Rooms />} />
                 <Route path="allocations" element={<AdminAllocations />} />
                 <Route path="mess" element={<AdminMess />} />
+                <Route path="fees" element={<AdminFees />} />
                 <Route path="leaves" element={<AdminLeaves />} />
+
                 <Route path="visitors" element={<Visitors />} />
                 <Route path="complaints" element={<AdminComplaints />} />
                 <Route path="scanner" element={<SecurityScanner />} />

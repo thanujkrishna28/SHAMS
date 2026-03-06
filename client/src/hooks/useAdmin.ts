@@ -29,7 +29,7 @@ export const useVerifyStudent = () => {
             return data;
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['all-students'] }); // Fixed key
+            queryClient.invalidateQueries({ queryKey: ['all-students'] });
         },
     });
 };
@@ -114,7 +114,7 @@ export const useAllVisitors = (date?: string, status?: string) => {
             let query = '';
             if (date) query += `date=${date}&`;
             if (status) query += `status=${status}`;
-            const { data } = await api.get(`/visitors?${query}`); // Admin endpoint is shared, handles filters
+            const { data } = await api.get(`/visitors?${query}`);
             return data;
         },
     });
@@ -129,6 +129,44 @@ export const useUpdateVisitorStatus = () => {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['all-visitors'] });
+            queryClient.invalidateQueries({ queryKey: ['admin-stats'] });
+        },
+    });
+};
+
+export const useAllFees = () => {
+    return useQuery({
+        queryKey: ['all-fees'],
+        queryFn: async () => {
+            const { data } = await api.get('/payments/all');
+            return data;
+        },
+    });
+};
+
+export const useMarkPaidOffline = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async ({ feeId, receiptNumber }: { feeId: string; receiptNumber: string }) => {
+            const { data } = await api.post('/payments/offline-pay', { feeId, receiptNumber });
+            return data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['all-fees'] });
+            queryClient.invalidateQueries({ queryKey: ['admin-stats'] });
+        },
+    });
+};
+
+export const useCreateFee = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async ({ studentId, totalAmount }: { studentId: string; totalAmount: number }) => {
+            const { data } = await api.post('/payments/create', { studentId, totalAmount });
+            return data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['all-fees'] });
             queryClient.invalidateQueries({ queryKey: ['admin-stats'] });
         },
     });

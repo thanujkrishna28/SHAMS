@@ -7,6 +7,25 @@ import { rateLimit } from 'express-rate-limit';
 import mongoSanitize from 'express-mongo-sanitize';
 import hpp from 'hpp';
 
+// Import Routes
+import authRoutes from './routes/authRoutes';
+import roomRoutes from './routes/roomRoutes';
+import announcementRoutes from './routes/announcementRoutes';
+import allocationRoutes from './routes/allocationRoutes';
+import attendanceRoutes from './routes/attendanceRoutes';
+import complaintRoutes from './routes/complaintRoutes';
+import adminRoutes from './routes/adminRoutes';
+import uploadRoutes from './routes/uploadRoutes';
+import leaveRoutes from './routes/leaveRoutes';
+import notificationRoutes from './routes/notificationRoutes';
+import visitorRoutes from './routes/visitorRoutes';
+import reportRoutes from './routes/reportRoutes';
+import messRoutes from './routes/messRoutes';
+import settingsRoutes from './routes/settingsRoutes';
+import hostelRoutes from './routes/hostelRoutes';
+import blockRoutes from './routes/blockRoutes';
+import paymentRoutes from './routes/paymentRoutes';
+
 const app = express();
 
 // Trust proxy for rate limiting (Render/Vercel)
@@ -16,6 +35,8 @@ app.set('trust proxy', 1);
 app.get('/', (req, res) => {
     res.json({ status: 'success', message: 'Smart HMS API is running' });
 });
+
+
 
 // Security Middleware
 app.use(helmet({
@@ -78,26 +99,10 @@ const limiter = rateLimit({
 });
 app.use('/api', limiter); // Apply to all API routes
 
-// Routes
-import authRoutes from './routes/authRoutes';
-import roomRoutes from './routes/roomRoutes';
-import announcementRoutes from './routes/announcementRoutes';
-import allocationRoutes from './routes/allocationRoutes';
-import attendanceRoutes from './routes/attendanceRoutes';
-import complaintRoutes from './routes/complaintRoutes';
-import adminRoutes from './routes/adminRoutes';
-import uploadRoutes from './routes/uploadRoutes';
-import leaveRoutes from './routes/leaveRoutes';
-import notificationRoutes from './routes/notificationRoutes';
-import visitorRoutes from './routes/visitorRoutes';
-import reportRoutes from './routes/reportRoutes';
-import messRoutes from './routes/messRoutes';
-import settingsRoutes from './routes/settingsRoutes';
-import hostelRoutes from './routes/hostelRoutes';
-import blockRoutes from './routes/blockRoutes';
-
+// Static Files
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
+// Register Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/rooms', roomRoutes);
 app.use('/api/announcements', announcementRoutes);
@@ -114,6 +119,8 @@ app.use('/api/mess', messRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/hostels', hostelRoutes);
 app.use('/api/blocks', blockRoutes);
+app.use('/api/payments', paymentRoutes);
+app.use('/api/fees', paymentRoutes);
 
 // Error Handling Middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {

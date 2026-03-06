@@ -18,7 +18,7 @@ const AuditLogSchema: Schema = new Schema(
         targetModel: {
             type: String,
             required: true,
-            enum: ['User', 'Room', 'Allocation', 'Complaint', 'Leave', 'Visitor', 'Announcement']
+            enum: ['User', 'Room', 'Allocation', 'Complaint', 'Leave', 'Visitor', 'Announcement', 'Fee']
         },
         details: { type: String },
         ipAddress: { type: String }

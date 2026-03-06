@@ -32,20 +32,15 @@ export interface Notification {
 
 export interface Fee {
     _id: string;
-    title: string;
-    description?: string;
-    amount: number;
-    amountPaid: number;
-    dueDate: string;
-    status: 'pending' | 'partially_paid' | 'paid';
-    type: 'tuition' | 'hostel' | 'mess' | 'other';
-    paymentLink?: string;
-    transactionHistory: Array<{
-        amount: number;
-        date: string;
-        transactionId: string;
-        paymentMethod: string;
-    }>;
+    student: User | string;
+    totalAmount: number;
+    status: 'PENDING' | 'PAID' | 'FAILED';
+    paymentMode?: 'ONLINE' | 'OFFLINE';
+    gatewayOrderId?: string;
+    transactionId?: string;
+    paidAt?: string;
+    receiptNumber?: string;
     createdAt: string;
     updatedAt: string;
 }
+

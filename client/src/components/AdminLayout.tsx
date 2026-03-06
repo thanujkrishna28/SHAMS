@@ -20,8 +20,10 @@ import {
     ClipboardCheck,
     Bed,
     Building2,
-    Scan
+    Scan,
+    CreditCard
 } from 'lucide-react';
+
 import { motion, AnimatePresence } from 'framer-motion';
 import NotificationList from './NotificationList';
 import { useNotifications } from '../hooks/useNotifications';
@@ -48,7 +50,9 @@ const AdminLayout = () => {
         { name: 'Rooms', path: '/admin/rooms', icon: Bed },
         { name: 'Allocations', path: '/admin/allocations', icon: ClipboardCheck },
         { name: 'Mess', path: '/admin/mess', icon: Utensils },
+        { name: 'Fees', path: '/admin/fees', icon: CreditCard },
         { name: 'Leaves', path: '/admin/leaves', icon: CalendarDays },
+
         { name: 'Visitors', path: '/admin/visitors', icon: ShieldCheck },
         { name: 'Complaints', path: '/admin/complaints', icon: MessageSquare },
         { name: 'Scanner', path: '/admin/scanner', icon: Scan },

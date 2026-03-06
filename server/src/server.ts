@@ -1,10 +1,11 @@
+import dotenv from 'dotenv';
+// Load environment variables before any other imports
+dotenv.config();
+
 import { createServer } from 'http';
 import app from './app';
 import connectDB from './config/db';
-import dotenv from 'dotenv';
 import { initSocket } from './utils/socket';
-
-dotenv.config();
 
 const PORT = process.env.PORT || 5000;
 const httpServer = createServer(app);

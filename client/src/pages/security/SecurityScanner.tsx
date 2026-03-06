@@ -9,36 +9,58 @@ const SecurityScanner = () => {
     const [scanResult, setScanResult] = useState<any>(null);
     const [lastScans, setLastScans] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
+    const [isScanning, setIsScanning] = useState(false);
+    const [scannerInstance, setScannerInstance] = useState<Html5QrcodeScanner | null>(null);
 
-    useEffect(() => {
+    const onScanSuccess = async (decodedText: string) => {
+        if (!loading) {
+            handleScan(decodedText);
+        }
+    };
+
+    const onScanFailure = () => {
+        // quiet error
+    };
+
+    const startScanner = () => {
         const scanner = new Html5QrcodeScanner(
             "reader",
-            { fps: 10, qrbox: { width: 250, height: 250 } },
+            {
+                fps: 10,
+                qrbox: { width: 250, height: 250 },
+                aspectRatio: 1.0
+            },
             /* verbose= */ false
         );
 
         scanner.render(onScanSuccess, onScanFailure);
+        setScannerInstance(scanner);
+        setIsScanning(true);
+    };
 
-        function onScanSuccess(decodedText: string) {
-            // We only want to process the scan if we're not currently loading a result
-            if (!loading) {
-                handleScan(decodedText);
+    const stopScanner = async () => {
+        if (scannerInstance) {
+            try {
+                await scannerInstance.clear();
+                setScannerInstance(null);
+                setIsScanning(false);
+            } catch (err) {
+                console.error("Failed to clear scanner", err);
             }
         }
+    };
 
-        function onScanFailure() {
-            // quiet error
-        }
-
+    useEffect(() => {
         return () => {
-            scanner.clear().catch(err => console.error("Failed to clear scanner", err));
+            if (scannerInstance) {
+                scannerInstance.clear().catch(err => console.error("Cleanup error", err));
+            }
         };
-    }, []);
+    }, [scannerInstance]);
 
     const handleScan = async (token: string) => {
         setLoading(true);
         try {
-            // Get geolocation for gate-side validation
             const position: any = await new Promise((resolve, reject) => {
                 navigator.geolocation.getCurrentPosition(resolve, reject);
             }).catch(() => null);
@@ -56,7 +78,6 @@ const SecurityScanner = () => {
             setLastScans(prev => [data, ...prev].slice(0, 5));
             toast.success(data.message);
 
-            // Auto reset after 3s
             setTimeout(() => {
                 setScanResult(null);
                 setLoading(false);
@@ -92,8 +113,35 @@ const SecurityScanner = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Scanner Section */}
                 <div className="space-y-4">
-                    <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm relative overflow-hidden">
-                        <div id="reader" className="overflow-hidden rounded-2xl border-none"></div>
+                    <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm relative overflow-hidden min-h-[350px] flex flex-col">
+                        <div id="reader" className={`overflow-hidden rounded-2xl border-none ${!isScanning ? 'hidden' : 'block'}`}></div>
+
+                        {!isScanning && (
+                            <div className="flex-1 flex flex-col items-center justify-center text-center p-8 space-y-6">
+                                <div className="w-20 h-20 bg-indigo-50 text-indigo-500 rounded-full flex items-center justify-center">
+                                    <Shield size={40} />
+                                </div>
+                                <div className="max-w-xs">
+                                    <h3 className="font-bold text-gray-900 text-lg">Camera Ready</h3>
+                                    <p className="text-gray-500 text-sm mt-2">Click below to enable your camera and begin verifying student identities.</p>
+                                </div>
+                                <button
+                                    onClick={startScanner}
+                                    className="px-8 py-3 bg-indigo-600 text-white rounded-2xl font-bold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 active:scale-95"
+                                >
+                                    Enable Camera
+                                </button>
+                            </div>
+                        )}
+
+                        {isScanning && (
+                            <button
+                                onClick={stopScanner}
+                                className="mt-4 text-xs font-bold text-red-500 uppercase tracking-widest hover:text-red-600 transition-colors mx-auto"
+                            >
+                                Stop Session
+                            </button>
+                        )}
 
                         <AnimatePresence>
                             {(loading || scanResult) && (

@@ -18,8 +18,10 @@ import {
     Utensils,
     Info,
     UserPlus,
-    Building
+    Building,
+    CreditCard
 } from 'lucide-react';
+
 import { motion, AnimatePresence } from 'framer-motion';
 import NotificationList from './NotificationList';
 import { useNotifications } from '../hooks/useNotifications';
@@ -50,7 +52,9 @@ const StudentLayout = () => {
         { name: 'Find Room', path: '/student/selection', icon: Building },
         { name: 'Attendance', path: '/student/attendance', icon: Clock },
         { name: 'Mess', path: '/student/mess', icon: Utensils },
+        { name: 'Fees', path: '/student/fees', icon: CreditCard },
         { name: 'Leave', path: '/student/leave', icon: CalendarDays },
+
         { name: 'Visitors', path: '/student/visitors', icon: UserPlus },
         { name: 'Complaints', path: '/student/complaints', icon: MessageSquare },
         { name: 'About', path: '/student/about', icon: Info },
