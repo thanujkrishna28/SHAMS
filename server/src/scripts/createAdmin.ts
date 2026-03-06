@@ -7,8 +7,8 @@ import path from 'path';
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 const createAdmin = async () => {
-    const adminEmail = process.argv[2];
-    const adminPassword = process.argv[3];
+    const adminEmail = process.argv[2] || process.env.ADMIN_EMAIL;
+    const adminPassword = process.argv[3] || process.env.ADMIN_PASSWORD;
     const adminName = process.argv[4] || 'System Administrator';
 
     if (!adminEmail || !adminPassword) {
