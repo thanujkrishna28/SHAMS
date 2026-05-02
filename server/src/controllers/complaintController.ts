@@ -3,18 +3,47 @@ import asyncHandler from 'express-async-handler';
 import Complaint from '../models/Complaint';
 import { createNotification, notifyAdmins } from './notificationController';
 import { logAudit } from '../utils/auditLogger';
+import { analyzeComplaint } from '../utils/aiService';
+import { sendSmartNotificationEmail } from '../utils/mailService';
+import User from '../models/User';
 
 // @desc    Create a new complaint
 // @route   POST /api/complaints
 // @access  Private (Student)
 export const createComplaint = asyncHandler(async (req: any, res: Response) => {
-    const { title, description, category } = req.body;
+    const { title, description, category, priority } = req.body;
+
+    // AI Intelligence: Auto-classify and Prioritize
+    const aiAnalysis = await analyzeComplaint(title, description);
+    
+    // Prefer AI suggestion if confident, else fallback to user input
+    const finalCategory = (['maintenance', 'cleanliness', 'electrical', 'plumbing', 'other'].includes(aiAnalysis?.category as string))
+        ? aiAnalysis?.category
+        : (category || 'maintenance');
+
+    const finalPriority = (['low', 'medium', 'high'].includes(aiAnalysis?.priority as string))
+        ? aiAnalysis?.priority
+        : (priority || 'medium');
+
+    const suggestedResolutionSteps = aiAnalysis?.resolutionSteps || null;
+
+    const dueDate = new Date();
+    if (finalPriority === 'high') {
+        dueDate.setHours(dueDate.getHours() + 24); // 24 hours SLA
+    } else if (finalPriority === 'medium') {
+        dueDate.setDate(dueDate.getDate() + 3); // 3 days SLA
+    } else {
+        dueDate.setDate(dueDate.getDate() + 7); // 7 days SLA
+    }
 
     const complaint = await Complaint.create({
         student: req.user._id,
         title,
         description,
-        category: category || 'maintenance',
+        category: finalCategory,
+        priority: finalPriority,
+        suggestedResolutionSteps,
+        dueDate,
         status: 'pending'
     });
 
@@ -23,6 +52,16 @@ export const createComplaint = asyncHandler(async (req: any, res: Response) => {
         `Student ${req.user.name} submitted a new complaint: ${title}`,
         'warning'
     );
+
+    // Email notification to student
+    try {
+        await sendSmartNotificationEmail(
+            req.user.email,
+            req.user.name,
+            'Complaint Received',
+            `We have received your complaint: "${title}". It has been classified as ${finalCategory} with ${finalPriority} priority.`
+        );
+    } catch (err) { console.error("Email failed", err) }
 
     res.status(201).json(complaint);
 });
@@ -77,6 +116,11 @@ export const updateComplaintStatus = asyncHandler(async (req: Request, res: Resp
     if (complaint) {
         complaint.status = status;
         complaint.adminComment = adminComment;
+        
+        if (status === 'resolved' || status === 'closed') {
+            complaint.resolvedAt = new Date();
+        }
+
         await complaint.save();
 
         await createNotification(
@@ -85,6 +129,19 @@ export const updateComplaintStatus = asyncHandler(async (req: Request, res: Resp
             `Your complaint "${complaint.title}" has been ${status}. ${adminComment ? `Comment: ${adminComment}` : ''}`,
             status === 'resolved' ? 'success' : 'info'
         );
+
+        // Email notification
+        const student = await User.findById(complaint.student);
+        if (student) {
+            try {
+                await sendSmartNotificationEmail(
+                    student.email,
+                    student.name,
+                    `Complaint ${status.charAt(0).toUpperCase() + status.slice(1)}`,
+                    `Your complaint "${complaint.title}" has been ${status}. ${adminComment ? `Staff Comment: ${adminComment}` : ''}`
+                );
+            } catch (err) { console.error("Email failed", err) }
+        }
 
         // Audit Log
         try {

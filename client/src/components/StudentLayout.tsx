@@ -49,9 +49,9 @@ const StudentLayout = () => {
         <div className="min-h-screen bg-background">
             {/* Mobile Header */}
             <div className="lg:hidden bg-surface border-b border-border p-4 flex items-center justify-between sticky top-0 z-30">
-                <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white font-bold">S</div>
-                    <span className="font-bold text-gray-900">Smart HMS</span>
+                <div onClick={() => navigate('/student/dashboard')} className="flex items-center gap-2 cursor-pointer group">
+                    <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white font-bold group-hover:scale-110 transition-transform">S</div>
+                    <span className="font-bold text-gray-900 group-hover:text-primary transition-colors">Smart HMS</span>
                 </div>
                 <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2 text-gray-600">
                     {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -68,11 +68,14 @@ const StudentLayout = () => {
                 >
                     <div className="flex flex-col h-full">
                         {/* Logo Area */}
-                        <div className="h-16 flex items-center px-6 border-b border-border/50">
-                            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white font-bold mr-3 shadow-lg shadow-primary/20">
+                        <div 
+                            onClick={() => navigate('/student/dashboard')} 
+                            className="h-16 flex items-center px-6 border-b border-border/50 cursor-pointer hover:bg-gray-50 transition-colors group"
+                        >
+                            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white font-bold mr-3 shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform">
                                 S
                             </div>
-                            <span className="font-bold text-gray-900 text-lg tracking-tight">Smart HMS</span>
+                            <span className="font-bold text-gray-900 text-lg tracking-tight group-hover:text-primary transition-colors">Smart HMS</span>
                         </div>
 
                         {/* User Profile Snippet */}
@@ -140,7 +143,12 @@ const StudentLayout = () => {
                     <header className="h-16 bg-surface/80 backdrop-blur-md border-b border-border flex items-center justify-between px-4 lg:px-8 z-20">
                         {/* Breadcrumbs / Page Title */}
                         <div className="flex items-center gap-2 text-sm text-gray-500">
-                            <span className="hidden lg:inline">Student Portal</span>
+                            <span 
+                                onClick={() => navigate('/student/dashboard')} 
+                                className="hidden lg:inline hover:text-primary cursor-pointer transition-colors font-medium"
+                            >
+                                Student Portal
+                            </span>
                             <ChevronRight size={16} className="hidden lg:inline" />
                             <span className="font-semibold text-gray-900 capitalize">
                                 {location.pathname.split('/').pop()?.replace('-', ' ') || 'Dashboard'}

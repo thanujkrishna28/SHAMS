@@ -7,7 +7,7 @@ export interface ILeave extends Document {
     endDate: Date;
     reason: string;
     type: 'sick' | 'personal' | 'academic' | 'emergency';
-    status: 'pending' | 'approved' | 'rejected';
+    status: 'pending' | 'recommended' | 'approved' | 'rejected';
     adminComment?: string;
     createdAt: Date;
     updatedAt: Date;
@@ -26,7 +26,7 @@ const LeaveSchema: Schema = new Schema(
         },
         status: {
             type: String,
-            enum: ['pending', 'approved', 'rejected'],
+            enum: ['pending', 'recommended', 'approved', 'rejected'],
             default: 'pending',
         },
         adminComment: { type: String },

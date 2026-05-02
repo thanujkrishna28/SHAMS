@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import asyncHandler from 'express-async-handler';
 import LaundryMachine from '../models/LaundryMachine';
 import LaundryBooking from '../models/LaundryBooking';
+import Laundry from '../models/Laundry';
 import { createNotification } from './notificationController';
 
 // @desc    Get all laundry machines
@@ -78,4 +79,64 @@ export const updateMachineStatus = asyncHandler(async (req: any, res: Response) 
     await machine.save();
 
     res.json(machine);
+});
+
+// --- Tracking Logic ---
+
+// @desc    Get my laundry logs
+// @route   GET /api/laundry/my
+// @access  Private (Student)
+export const getMyLaundry = asyncHandler(async (req: any, res: Response) => {
+    const logs = await Laundry.find({ student: req.user._id }).sort({ createdAt: -1 });
+    res.json(logs);
+});
+
+// @desc    Add laundry log
+// @route   POST /api/laundry/track
+// @access  Private (Warden/Staff)
+export const addLaundryLog = asyncHandler(async (req: any, res: Response) => {
+    const { studentId, itemCount, notes } = req.body;
+
+    const laundry = await Laundry.create({
+        student: studentId,
+        itemCount,
+        notes,
+        status: 'picked-up'
+    });
+
+    await createNotification(
+        studentId,
+        'Laundry Picked Up',
+        `Your laundry (${itemCount} items) has been picked up. Tracking ID: ${laundry._id.toString().slice(-6)}`,
+        'info'
+    );
+
+    res.status(201).json(laundry);
+});
+
+// @desc    Update laundry status
+// @route   PUT /api/laundry/track/:id
+// @access  Private (Warden/Staff)
+export const updateLaundryStatus = asyncHandler(async (req: Request, res: Response) => {
+    const { status, deliveryDate } = req.body;
+    const laundry = await Laundry.findById(req.params.id);
+
+    if (laundry) {
+        laundry.status = status;
+        if (deliveryDate) laundry.deliveryDate = deliveryDate;
+        
+        await laundry.save();
+
+        await createNotification(
+            laundry.student.toString(),
+            `Laundry Status: ${status.replace('-', ' ')}`,
+            `Your laundry status is now: ${status}.`,
+            status === 'ready' ? 'success' : 'info'
+        );
+
+        res.json(laundry);
+    } else {
+        res.status(404);
+        throw new Error('Laundry log not found');
+    }
 });

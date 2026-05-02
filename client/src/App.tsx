@@ -1,5 +1,4 @@
 import React from 'react';
-/* import AdminVisitors ... */
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'react-hot-toast';
@@ -8,45 +7,53 @@ import { useAuthStore } from './store/authStore';
 
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
+import ForgotPassword from './pages/auth/ForgotPassword';
 import AdminLogin from './pages/auth/AdminLogin';
-import AdminDashboard from './pages/admin/AdminDashboard';
 import ProtectedRoute from './components/ProtectedRoute';
 
 // Layouts
 import StudentLayout from './components/StudentLayout';
-import AdminLayout from './components/AdminLayout';
 import SecurityLayout from './components/SecurityLayout';
 import SystemGuard from './components/SystemGuard';
 import SocketManager from './components/SocketManager';
 
-// Admin Pages
-import Rooms from './pages/admin/Rooms';
-import AdminAllocations from './pages/admin/AdminAllocations';
-import AdminStudents from './pages/admin/AdminStudents';
-import AdminHostels from './pages/admin/AdminHostels';
-import AdminServices from './pages/admin/AdminServices';
+// Admin Pages (Shared)
+import Students from './pages/admin/Students';
+import AdminComplaints from './pages/admin/Complaints';
+import Visitors from './pages/admin/Visitors';
+import AuditLogs from './pages/admin/AuditLogs';
+
+// Chief Warden Pages
+import Stats from './pages/chief-warden/Stats';
+import ChiefWardenServices from './pages/chief-warden/Services';
+import Rooms from './pages/chief-warden/Rooms';
+import Allocations from './pages/chief-warden/Allocations';
+import Fees from './pages/chief-warden/Fees';
+import Mess from './pages/chief-warden/Mess';
+import Leaves from './pages/chief-warden/Leaves';
+import Hostels from './pages/chief-warden/Hostels';
+import Settings from './pages/chief-warden/Settings';
+import WardenManagement from './pages/chief-warden/WardenManagement';
 
 // Student Pages
 import StudentDashboard from './pages/student/StudentDashboard';
-import Services from './pages/student/Services';
+import StudentServices from './pages/student/Services';
 import MyRoom from './pages/student/MyRoom';
 import RoomSelection from './pages/student/RoomSelection';
-import Complaints from './pages/student/Complaints';
+import StudentComplaints from './pages/student/Complaints';
 import Leave from './pages/student/Leave';
 import Profile from './pages/student/Profile';
-import Attendance from './pages/student/Attendance';
+import StudentAttendance from './pages/student/Attendance';
+
+// Warden Pages
+import WardenAttendance from './pages/warden/Attendance';
+import WardenLayout from './components/WardenLayout';
 
 // Security Pages
 import SecurityScanner from './pages/security/SecurityScanner';
 import ParcelManagement from './pages/security/ParcelManagement';
 
-import AdminComplaints from './pages/admin/AdminComplaints';
-import AdminLeaves from './pages/admin/AdminLeaves';
-import AdminSettings from './pages/admin/AdminSettings';
-import Visitors from './pages/admin/Visitors';
-import AdminMess from './pages/admin/AdminMess';
-import AdminFees from './pages/admin/AdminFees';
-import Mess from './pages/student/Mess';
+import StudentMess from './pages/student/Mess';
 import StudentFees from './pages/student/StudentFees';
 import StudentParcels from './pages/student/StudentParcels';
 import StudentVisitors from './pages/student/Visitors';
@@ -79,6 +86,7 @@ function App() {
             {/* Public Routes */}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/admin/login" element={<AdminLogin />} />
 
             {/* Student Routes */}
@@ -86,14 +94,14 @@ function App() {
               <Route path="/student" element={<SystemGuard><StudentLayout /></SystemGuard>}>
                 <Route index element={<Navigate to="/student/dashboard" replace />} />
                 <Route path="dashboard" element={<StudentDashboard />} />
-                <Route path="services" element={<Services />} />
+                <Route path="services" element={<StudentServices />} />
                 <Route path="profile" element={<Profile />} />
                 <Route path="room" element={<MyRoom />} />
                 <Route path="selection" element={<RoomSelection />} />
-                <Route path="attendance" element={<Attendance />} />
+                <Route path="attendance" element={<StudentAttendance />} />
                 <Route path="laundry" element={<LaundryManagement />} />
                 <Route path="lost-found" element={<LostFound />} />
-                <Route path="mess" element={<Mess />} />
+                <Route path="mess" element={<StudentMess />} />
                 <Route path="fees" element={<StudentFees />} />
                 <Route path="payment-simulator" element={<PaymentSimulator />} />
 
@@ -101,7 +109,7 @@ function App() {
 
                 <Route path="visitors" element={<StudentVisitors />} />
                 <Route path="parcels" element={<StudentParcels />} />
-                <Route path="complaints" element={<Complaints />} />
+                <Route path="complaints" element={<StudentComplaints />} />
                 <Route path="about" element={<AboutUs />} />
               </Route>
             </Route>
@@ -112,29 +120,41 @@ function App() {
             </Route>
 
 
-            {/* Admin Routes */}
-            <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
-              <Route path="/admin" element={<AdminLayout />}>
-                <Route index element={<Navigate to="/admin/dashboard" replace />} />
-                <Route path="dashboard" element={<AdminDashboard />} />
-                <Route path="services" element={<AdminServices />} />
-                <Route path="hostels" element={<AdminHostels />} />
-                <Route path="students" element={<AdminStudents />} />
-                <Route path="rooms" element={<Rooms />} />
-                <Route path="allocations" element={<AdminAllocations />} />
-                <Route path="mess" element={<AdminMess />} />
-                <Route path="fees" element={<AdminFees />} />
-                <Route path="leaves" element={<AdminLeaves />} />
-
-                <Route path="visitors" element={<Visitors />} />
+            {/* Warden Routes */}
+            <Route element={<ProtectedRoute allowedRoles={['warden', 'chief_warden', 'admin']} />}>
+              <Route path="/warden" element={<WardenLayout />}>
+                <Route index element={<Navigate to="/warden/attendance" replace />} />
+                <Route path="attendance" element={<WardenAttendance />} />
+                <Route path="students" element={<Students />} />
+                <Route path="parcels" element={<ParcelManagement />} />
                 <Route path="complaints" element={<AdminComplaints />} />
-                <Route path="scanner" element={<SecurityScanner />} />
-                <Route path="settings" element={<AdminSettings />} />
-                <Route path="about" element={<AboutUs />} />
+                <Route path="visitors" element={<Visitors />} />
+                <Route path="audit-logs" element={<AuditLogs />} />
               </Route>
             </Route>
 
-            {/* Security Routes */}
+            {/* Chief Warden Routes */}
+            <Route element={<ProtectedRoute allowedRoles={['chief_warden', 'admin']} />}>
+              <Route path="/chief-warden" element={<WardenLayout />}>
+                <Route index element={<Navigate to="/chief-warden/stats" replace />} />
+                <Route path="stats" element={<Stats />} />
+                <Route path="services" element={<ChiefWardenServices />} />
+                <Route path="rooms" element={<Rooms />} />
+                <Route path="allocations" element={<Allocations />} />
+                <Route path="students" element={<Students />} />
+                <Route path="fees" element={<Fees />} />
+                <Route path="mess" element={<Mess />} />
+                <Route path="complaints" element={<AdminComplaints />} />
+                <Route path="leaves" element={<Leaves />} />
+                <Route path="visitors" element={<Visitors />} />
+                <Route path="wardens" element={<WardenManagement />} />
+                <Route path="audit-logs" element={<AuditLogs />} />
+                <Route path="hostels" element={<Hostels />} />
+                <Route path="settings" element={<Settings />} />
+              </Route>
+            </Route>
+
+            {/* Security Routes (Legacy/Staff) */}
             <Route element={<ProtectedRoute allowedRoles={['security', 'admin']} />}>
               <Route path="/security" element={<SecurityLayout />}>
                 <Route index element={<Navigate to="/security/scanner" replace />} />

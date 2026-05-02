@@ -5,7 +5,16 @@ export interface IAdmin extends Document {
     name: string;
     email: string;
     password?: string;
-    role: 'admin';
+    role: 'admin' | 'chief_warden';
+    profile?: {
+        hostel?: mongoose.Types.ObjectId;
+        block?: string;
+        phone?: string;
+        profileImage?: string;
+        mfaSecret?: string;
+        isMFAEnabled?: boolean;
+    };
+    isActive: boolean;
     createdAt: Date;
     updatedAt: Date;
     matchPassword(enteredPassword: string): Promise<boolean>;
@@ -18,8 +27,18 @@ const AdminSchema: Schema = new Schema(
         password: { type: String, required: true },
         role: {
             type: String,
-            default: 'admin',
+            enum: ['admin', 'chief_warden'],
+            required: true,
         },
+        profile: {
+            hostel: { type: Schema.Types.ObjectId, ref: 'Hostel' },
+            block: String,
+            phone: String,
+            profileImage: String,
+            mfaSecret: { type: String, select: false },
+            isMFAEnabled: { type: Boolean, default: false }
+        },
+        isActive: { type: Boolean, default: true },
     },
     { timestamps: true }
 );

@@ -23,6 +23,19 @@ export const useLockRoom = () => {
     });
 };
 
+export const useUnlockRoom = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async (roomId: string) => {
+            const response = await api.post(`/rooms/${roomId}/unlock`);
+            return response.data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['rooms'] });
+        },
+    });
+};
+
 export const useMyAllocation = () => {
     return useQuery({
         queryKey: ['my-allocation'],

@@ -8,11 +8,11 @@ export interface User {
 
 export interface Room {
     _id: string;
-    block: string;
+    block: any;
     floor: number;
     roomNumber: string;
     capacity: number;
-    occupants: User[];
+    occupants: any[];
     type: 'single' | 'double' | 'triple' | 'dorm';
     isAC?: boolean;
     status: 'available' | 'full' | 'maintenance' | 'locked';
@@ -32,9 +32,15 @@ export interface Notification {
 
 export interface Fee {
     _id: string;
-    student: User | string;
+    student: any;
+    type: string;
+    description?: string;
+    academicYear: string;
     totalAmount: number;
-    status: 'PENDING' | 'PAID' | 'FAILED';
+    paidAmount: number;
+    balanceAmount: number;
+    dueDate: string;
+    status: 'PENDING' | 'PAID' | 'FAILED' | 'PARTIAL';
     paymentMode?: 'ONLINE' | 'OFFLINE';
     gatewayOrderId?: string;
     transactionId?: string;

@@ -4,7 +4,7 @@ export interface IAuditLog extends Document {
     admin: mongoose.Types.ObjectId;
     action: string;
     targetId: mongoose.Types.ObjectId;
-    targetModel: 'User' | 'Room' | 'Allocation' | 'Complaint' | 'Leave';
+    targetModel: 'User' | 'Room' | 'Allocation' | 'Complaint' | 'Leave' | 'Visitor' | 'Announcement' | 'Fee';
     details?: string;
     ipAddress?: string;
     createdAt: Date;

@@ -3,6 +3,9 @@ import asyncHandler from 'express-async-handler';
 import Hostel from '../models/Hostel';
 import Block from '../models/Block';
 import Room from '../models/Room';
+import Warden from '../models/Warden';
+import sendEmail from '../utils/sendEmail';
+import { getHostelCreationEmail } from '../utils/emailTemplates';
 
 // @desc    Get all hostels
 // @route   GET /api/hostels
@@ -35,7 +38,7 @@ export const getHostels = asyncHandler(async (req: any, res: Response) => {
 // @route   POST /api/hostels
 // @access  Private (Admin)
 export const createHostel = asyncHandler(async (req: Request, res: Response) => {
-    const { name, type, description, wardenName, contactNumber } = req.body;
+    const { name, type, description, chiefWardenName, chiefWardenEmail, contactNumber } = req.body;
 
     const hostelExists = await Hostel.findOne({ name });
     if (hostelExists) {
@@ -47,10 +50,63 @@ export const createHostel = asyncHandler(async (req: Request, res: Response) => 
         name,
         type,
         description,
-        wardenName,
+        chiefWardenName,
+        chiefWardenEmail,
         contactNumber,
         isActive: true
     });
+
+    // Handle Chief Warden Account Creation and Notification
+    if (chiefWardenEmail) {
+        // Check if Warden account already exists
+        let warden = await Warden.findOne({ email: chiefWardenEmail.toLowerCase() });
+        
+        const defaultPassword = 'warden' + Math.floor(1000 + Math.random() * 9000); // Generate a simple temporary password
+
+        if (!warden) {
+            // Create new Warden account
+            warden = await Warden.create({
+                name: chiefWardenName || 'Chief Warden',
+                email: chiefWardenEmail.toLowerCase(),
+                password: defaultPassword, // This will be hashed by the model pre-save hook
+                role: 'warden',
+                profile: {
+                    hostel: hostel._id,
+                    phone: contactNumber
+                }
+            });
+            console.log(`✅ Created new Warden account for ${chiefWardenEmail} with temporary password: ${defaultPassword}`);
+        } else {
+            // Link existing warden to this new hostel if not already linked
+            if (!warden.profile?.hostel) {
+                warden.profile = {
+                    ...warden.profile,
+                    hostel: hostel._id
+                };
+                await warden.save();
+            }
+        }
+
+        try {
+            // Send Email with credentials if it's a new account
+            await sendEmail({
+                email: chiefWardenEmail,
+                subject: 'Smart HMS - New Hostel Management Assignment',
+                message: `You have been assigned as Chief Warden for ${name}.`,
+                html: getHostelCreationEmail(
+                    chiefWardenName || 'Chief Warden', 
+                    name, 
+                    type,
+                    { 
+                        email: chiefWardenEmail, 
+                        password: warden?.createdAt.getTime() === warden?.updatedAt.getTime() ? defaultPassword : undefined
+                    }
+                )
+            });
+        } catch (error) {
+            console.error('Email sending failed for new hostel:', error);
+        }
+    }
 
     res.status(201).json(hostel);
 });
@@ -65,7 +121,8 @@ export const updateHostel = asyncHandler(async (req: Request, res: Response) => 
         hostel.name = req.body.name || hostel.name;
         hostel.type = req.body.type || hostel.type;
         hostel.description = req.body.description || hostel.description;
-        hostel.wardenName = req.body.wardenName || hostel.wardenName;
+        hostel.chiefWardenName = req.body.chiefWardenName || hostel.chiefWardenName;
+        hostel.chiefWardenEmail = req.body.chiefWardenEmail || hostel.chiefWardenEmail;
         hostel.contactNumber = req.body.contactNumber || hostel.contactNumber;
         hostel.isActive = req.body.isActive !== undefined ? req.body.isActive : hostel.isActive;
 

@@ -5,7 +5,8 @@ export interface IHostel extends Document {
     type: 'BOYS' | 'GIRLS';
     description?: string;
     totalBlocks: number;
-    wardenName?: string;
+    chiefWardenName?: string;
+    chiefWardenEmail?: string;
     contactNumber?: string;
     isActive: boolean;
     createdAt: Date;
@@ -18,7 +19,8 @@ const HostelSchema: Schema = new Schema(
         type: { type: String, enum: ['BOYS', 'GIRLS'], required: true },
         description: { type: String },
         totalBlocks: { type: Number, default: 0 },
-        wardenName: { type: String },
+        chiefWardenName: { type: String },
+        chiefWardenEmail: { type: String },
         contactNumber: { type: String },
         isActive: { type: Boolean, default: true },
     },

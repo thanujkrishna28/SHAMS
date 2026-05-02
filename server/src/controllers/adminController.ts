@@ -7,6 +7,8 @@ import Allocation from '../models/Allocation';
 import Hostel from '../models/Hostel';
 import Block from '../models/Block';
 import mongoose from 'mongoose';
+import AuditLog from '../models/AuditLog';
+import { logAuditAction } from '../utils/auditLogger';
 
 // @desc    Get admin dashboard stats
 // @route   GET /api/admin/stats
@@ -185,9 +187,46 @@ export const verifyStudent = asyncHandler(async (req: Request, res: Response) =>
         // Optionally send email here
 
         await user.save();
+
+        // Record Audit Log
+        await logAuditAction({
+            adminId: (req as any).user._id.toString(),
+            action: 'Student Verified',
+            targetId: user._id.toString(),
+            targetModel: 'User',
+            details: `Verified student profile: ${user.name} (${user.email})`,
+            ipAddress: req.ip
+        });
+
         res.json({ message: 'Student verified successfully' });
     } else {
         res.status(404);
         throw new Error('User not found');
     }
+});
+
+// @desc    Get audit logs
+// @route   GET /api/admin/audit-logs
+// @access  Private (Admin)
+export const getAuditLogs = asyncHandler(async (req: Request, res: Response) => {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 50;
+    const skip = (page - 1) * limit;
+
+    const total = await AuditLog.countDocuments();
+    const logs = await AuditLog.find()
+        .populate('admin', 'name email role')
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit);
+
+    res.json({
+        data: logs,
+        meta: {
+            page,
+            limit,
+            total,
+            pages: Math.ceil(total / limit)
+        }
+    });
 });

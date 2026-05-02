@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import User, { IUser } from '../models/User';
 import Admin from '../models/Admin';
+import Warden from '../models/Warden';
 
 export const protect = async (req: Request, res: Response, next: NextFunction) => {
     let token;
@@ -16,12 +17,17 @@ export const protect = async (req: Request, res: Response, next: NextFunction) =
 
             const decoded = jwt.verify(token, process.env.JWT_SECRET) as { id: string };
 
-            // Check in Users collection
+            // Check in Users collection (Students)
             let user: any = await User.findById(decoded.id).select('-password');
 
-            // If not found, check in Admins collection
+            // If not found, check in Admins collection (Admin/Chief Warden)
             if (!user) {
                 user = await Admin.findById(decoded.id).select('-password');
+            }
+
+            // If still not found, check in Wardens collection
+            if (!user) {
+                user = await Warden.findById(decoded.id).select('-password');
             }
 
             (req as any).user = user;
@@ -42,18 +48,50 @@ export const protect = async (req: Request, res: Response, next: NextFunction) =
     }
 };
 
+const ROLE_LEVELS: Record<string, number> = {
+    'student': 1,
+    'security': 2,
+    'warden': 3,
+    'chief_warden': 4,
+    'admin': 5
+};
 
 export const authorize = (...roles: string[]) => {
     return (req: Request, res: Response, next: NextFunction) => {
-        if (!roles.includes((req as any).user.role)) {
-            res.status(403).json({
-                message: `User role ${(req as any).user.role} is not authorized to access this route`
+        const user = (req as any).user;
+        const userRole = String(user?.role || '').toLowerCase().trim();
+        const allowedRoles = roles.map(r => String(r).toLowerCase().trim());
+
+        if (!userRole || !allowedRoles.includes(userRole)) {
+            return res.status(403).json({
+                message: `Access denied. Role "${userRole}" is not authorized.`
             });
-            return;
         }
         next();
     };
 };
-// Backward compatibility / shortcut aliases
-export const admin = authorize('admin');
-export const security = authorize('security');
+
+/**
+ * Ensures the user has a minimum privilege level.
+ * 1: student, 2: security, 3: warden, 4: chief_warden, 5: admin
+ */
+export const requireLevel = (minLevel: number) => {
+    return (req: Request, res: Response, next: NextFunction) => {
+        const user = (req as any).user;
+        const userRole = String(user?.role || '').toLowerCase().trim();
+        const currentLevel = ROLE_LEVELS[userRole] || 0;
+
+        if (currentLevel < minLevel) {
+            return res.status(403).json({
+                message: `Insufficient privileges. Minimum level ${minLevel} required (Current: ${currentLevel}).`
+            });
+        }
+        next();
+    };
+};
+
+// Convenience aliases
+export const admin = requireLevel(5);
+export const chiefWarden = requireLevel(4);
+export const warden = requireLevel(3);
+export const security = requireLevel(2);

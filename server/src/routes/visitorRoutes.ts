@@ -7,13 +7,13 @@ const router = express.Router();
 router.route('/')
     .post(protect, registerVisitor)
     .get(protect, (req: any, res, next) => {
-        if (req.user.role === 'admin' || req.user.role === 'security') {
+        if (['admin', 'security', 'warden', 'chief_warden'].includes(req.user.role)) {
             return getAllVisitors(req, res, next);
         } else {
             return getMyVisitors(req, res, next);
         }
     });
 
-router.route('/:id').put(protect, authorize('admin', 'security'), updateVisitorStatus);
+router.route('/:id').put(protect, authorize('admin', 'security', 'warden', 'chief_warden'), updateVisitorStatus);
 
 export default router;

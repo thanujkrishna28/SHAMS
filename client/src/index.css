@@ -1,33 +1,70 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   body {
-    @apply bg-background text-text-main font-sans antialiased;
+    @apply bg-slate-50 text-slate-900 font-sans antialiased;
+  }
+  
+  .dark body {
+    @apply bg-slate-950 text-slate-50;
   }
 }
 
 @layer components {
+  /* Premium Card System */
+  .card-premium {
+    @apply bg-white border border-slate-200 rounded-2xl shadow-sm p-6 transition-all duration-300;
+  }
+  
+  .card-premium:hover {
+    @apply shadow-lg border-indigo-500/20;
+  }
+  
+  .dark .card-premium {
+    @apply bg-slate-900 border-slate-800 shadow-none;
+  }
+
+  .dark .card-premium:hover {
+    @apply border-indigo-500/40;
+  }
+
+  /* Unified Button System */
   .btn-primary {
-    @apply px-4 py-2 bg-primary text-white rounded-xl shadow-soft hover:bg-primary-hover transition-all duration-200 active:scale-95 text-sm font-medium;
+    @apply px-6 py-2.5 bg-indigo-600 text-white rounded-xl shadow-sm hover:bg-indigo-700 transition-all duration-200 active:scale-95 text-sm font-semibold focus:ring-2 focus:ring-indigo-500/40 focus:outline-none;
   }
 
   .btn-secondary {
-    @apply px-4 py-2 bg-white text-text-main border border-border rounded-xl shadow-sm hover:shadow-soft hover:bg-gray-50 transition-all duration-200 active:scale-95 text-sm font-medium;
+    @apply px-6 py-2.5 bg-white text-slate-900 border border-slate-200 rounded-xl shadow-sm hover:bg-slate-50 transition-all duration-200 active:scale-95 text-sm font-semibold focus:ring-2 focus:ring-indigo-500/10 focus:outline-none;
   }
   
-  .card-premium {
-    @apply bg-surface border border-border rounded-xl shadow-soft p-6 transition-all hover:shadow-lg hover:border-primary/20;
+  .dark .btn-secondary {
+    @apply bg-slate-800 text-white border-slate-700 hover:bg-slate-700;
   }
 
+  /* Professional Badge System */
+  .badge-base {
+    @apply px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider border;
+  }
+
+  .badge-pending { @apply badge-base bg-slate-100 text-slate-600 border-slate-200; }
+  .badge-inprogress { @apply badge-base bg-blue-50 text-blue-600 border-blue-100; }
+  .badge-escalated { @apply badge-base bg-orange-50 text-orange-600 border-orange-100; }
+  .badge-resolved { @apply badge-base bg-emerald-50 text-emerald-600 border-emerald-100; }
+  .badge-closed { @apply badge-base bg-gray-100 text-gray-500 border-gray-200; }
+
+  /* AI Branding */
+  .ai-badge {
+    @apply flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-full text-xs font-black uppercase tracking-widest shadow-md;
+  }
+
+  /* Inputs */
   .input-field {
-    @apply w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm;
+    @apply w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-sm text-slate-900;
   }
-
-  .micro-interaction {
-    @apply transition-transform active:scale-95 cursor-pointer;
+  
+  .dark .input-field {
+    @apply bg-slate-800 border-slate-700 text-white focus:ring-indigo-500/40;
   }
 }

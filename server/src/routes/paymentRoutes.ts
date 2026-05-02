@@ -1,32 +1,28 @@
 import express from 'express';
 import {
     createOrder,
-    handleWebhook,
-    getFeeStatus,
     markOfflinePaid,
     getMyFee,
     getAllFees,
     adminCreateFee,
     simulateSuccess,
-    verifyPayment
+    downloadReceipt,
+    verifyPayment,
 } from '../controllers/paymentController';
-import { protect, admin } from '../middleware/authMiddleware';
+import { protect, authorize } from '../middleware/authMiddleware';
 
 const router = express.Router();
 
-// Public webhook
-router.post('/webhook', handleWebhook);
+// Student Routes
+router.post('/create-order', protect, authorize('student'), createOrder);
+router.post('/verify', protect, authorize('student'), verifyPayment);
+router.get('/my-fee', protect, authorize('student'), getMyFee);
+router.get('/receipt/:feeId', protect, downloadReceipt);
+router.post('/simulate-success', protect, simulateSuccess); // Keep for dev testing
 
-// Protected routes
-router.post('/create-order', protect, createOrder);
-router.post('/verify', protect, verifyPayment);
-router.post('/simulate-success', protect, simulateSuccess);
-router.get('/my-fee', protect, getMyFee);
-router.get('/status/:feeId', protect, getFeeStatus);
-router.get('/all', protect, admin, getAllFees);
-router.post('/create', protect, admin, adminCreateFee);
-router.post('/offline-pay', protect, admin, markOfflinePaid);
-
-
+// Admin & Chief Warden Routes
+router.get('/all', protect, authorize('admin', 'chief_warden'), getAllFees);
+router.post('/create', protect, authorize('admin', 'chief_warden'), adminCreateFee);
+router.post('/offline-pay', protect, authorize('admin', 'chief_warden'), markOfflinePaid);
 
 export default router;

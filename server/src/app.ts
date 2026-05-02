@@ -28,6 +28,11 @@ import paymentRoutes from './routes/paymentRoutes';
 import parcelRoutes from './routes/parcelRoutes';
 import laundryRoutes from './routes/laundryRoutes';
 import lostFoundRoutes from './routes/lostFoundRoutes';
+import wardenRoutes from './routes/wardenRoutes';
+import eventRoutes from './routes/eventRoutes';
+import feedbackRoutes from './routes/feedbackRoutes';
+import analyticsRoutes from './routes/analyticsRoutes';
+import webauthnRoutes from './routes/webauthnRoutes';
 
 const app = express();
 
@@ -55,7 +60,7 @@ const allowedOrigins = [
     'https://shams-green.vercel.app',
     'http://localhost:5173',
     'http://localhost:3000',
-    'http://192.168.0.101:5173'
+    'http://127.0.0.1:5173'
 ].filter(Boolean) as string[];
 
 app.use(cors({
@@ -127,6 +132,11 @@ app.use('/api/fees', paymentRoutes);
 app.use('/api/parcels', parcelRoutes);
 app.use('/api/laundry', laundryRoutes);
 app.use('/api/lost-found', lostFoundRoutes);
+app.use('/api/wardens', wardenRoutes);
+app.use('/api/events', eventRoutes);
+app.use('/api/feedback', feedbackRoutes);
+app.use('/api/analytics', analyticsRoutes);
+app.use('/api/webauthn', webauthnRoutes);
 
 // Error Handling Middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {

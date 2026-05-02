@@ -2,167 +2,167 @@ import { Request, Response } from 'express';
 import asyncHandler from 'express-async-handler';
 import User from '../models/User';
 import AttendanceLog from '../models/AttendanceLog';
-import UsedToken from '../models/UsedToken';
-import { generateShortToken } from '../utils/generateToken';
+import Room from '../models/Room';
+import Block from '../models/Block';
+import { createNotification } from './notificationController';
 import sendEmail from '../utils/sendEmail';
 import { getAttendanceEmail } from '../utils/emailTemplates';
-import jwt from 'jsonwebtoken';
-import { createNotification } from './notificationController';
 
-// @desc    Get dynamic QR code payload (Student)
-// @route   GET /api/attendance/qr-code
-// @access  Private (Student)
-export const getMyQRCode = asyncHandler(async (req: any, res: Response) => {
-    // Get user from DB to check deviceId
-    const user = await User.findById(req.user._id);
-    if (!user) {
-        res.status(404);
-        throw new Error('User not found');
+// @desc    Get rooms assigned to Warden's hostel
+// @route   GET /api/attendance/warden/rooms
+// @access  Private (Warden)
+export const getWardenRooms = asyncHandler(async (req: any, res: Response) => {
+    const warden = req.user; // Already populated from correct collection by protect middleware
+    if (!warden || !['warden', 'chief_warden'].includes(warden.role)) {
+        res.status(403);
+        throw new Error('Access denied. Wardens only.');
     }
 
-    // Identify current device (simplified for web/demo- in real mobile app, device-id is passed in headers)
-    const currentDeviceId = req.headers['x-device-id'] as string || 'default-browser-device';
+    const hostelId = warden.profile?.hostel;
+    if (!hostelId) {
+        res.status(400);
+        throw new Error('No hostel assigned to this Warden.');
+    }
 
-    // Device Binding Logic
-    if (user.profile) {
-        if (!user.profile.deviceId) {
-            // Bind on first use
-            user.profile.deviceId = currentDeviceId;
-            await user.save();
-        } else if (user.profile.deviceId !== currentDeviceId) {
-            res.status(403);
-            throw new Error('QR generation restricted to registered device. Contact Admin.');
+    let query: any = { hostel: hostelId };
+    
+    // If Chief Warden, filter by their assigned block name if it exists
+    if (warden.role === 'chief_warden' && warden.profile?.block) {
+        // Find block ID from name
+        const block = await Block.findOne({ 
+            name: warden.profile.block, 
+            hostel: hostelId 
+        });
+        if (block) {
+            query.block = block._id;
         }
     }
 
-    // Generate token with device fingerprint and JTI
-    const token = generateShortToken(req.user._id, 'entry-exit', currentDeviceId);
+    const rooms = await Room.find(query)
+        .populate('occupants', 'name profile.profileImage profile.studentId')
+        .sort({ roomNumber: 1 });
 
-    res.json({
-        token,
-        validUntil: new Date(Date.now() + 30000)
-    });
+    res.json(rooms);
 });
 
-// @desc    Scan QR Code (Guard/Admin)
-// @route   POST /api/attendance/scan
-// @access  Private (Admin/Security)
-export const scanQRCode = asyncHandler(async (req: any, res: Response) => {
-    const { qrToken, location, coords } = req.body; // coords: { lat, lng }
+// @desc    Mark attendance for a specific room (Manual Round)
+// @route   POST /api/attendance/warden/mark-room
+// @access  Private (Warden)
+export const markRoomAttendance = asyncHandler(async (req: any, res: Response) => {
+    const { roomId, attendanceData } = req.body; 
+    // attendanceData: Array<{ studentId: string, status: 'present' | 'absent' }>
 
-    if (!qrToken) {
-        res.status(400);
-        throw new Error('QR Token is required');
+    const warden = req.user;
+    if (!warden || !['warden', 'chief_warden'].includes(warden.role)) {
+        res.status(403);
+        throw new Error('Access denied. Wardens only.');
     }
 
-    // 1. Verify JWT
-    let decoded: any;
-    try {
-        decoded = jwt.verify(qrToken, process.env.JWT_SECRET || 'secret');
-    } catch (e) {
-        res.status(400);
-        throw new Error('Invalid or Expired QR Code');
-    }
-
-    // 2. Check JTI (Nonce) for Replay Attack
-    const tokenUsed = await UsedToken.findOne({ jti: decoded.jti });
-    if (tokenUsed) {
-        res.status(400);
-        throw new Error('QR Code already used');
-    }
-
-    // 3. Directional Logic & User Validation
-    const student = await User.findById(decoded.id);
-    if (!student) {
+    const room = await Room.findById(roomId);
+    if (!room) {
         res.status(404);
-        throw new Error('Student not found');
+        throw new Error('Room not found');
     }
 
-    // 4. Device Binding Check (Server Side)
-    if (student.profile?.deviceId !== decoded.deviceId) {
-        res.status(400);
-        throw new Error('Fraud Detected: QR from unauthorized device');
-    }
+    const logs = [];
 
-    // 5. Geo-Fencing (Mock)
-    // In production, compare 'coords' with Gate coordinates
-    // if (distance(coords, GATE_COORDS) > 100) throw Error('Not at Gate');
+    for (const item of attendanceData) {
+        const student = await User.findById(item.studentId);
+        if (!student) continue;
 
-    const currentlyInside = student.profile?.isInside !== false; // Default true
+        const log = await AttendanceLog.create({
+            student: student._id,
+            type: item.status,
+            location: warden.profile?.block || 'Hostel Block',
+            room: roomId,
+            scannedBy: warden._id,
+        });
 
-    // Direction logic (Entry logic)
-    // If scanning for Entry (coming from Outside): isInside must be false
-    // If scanning for Exit (going from Inside): isInside must be true
-    // However, if we want a generic scanner:
-    const newStatus = !currentlyInside;
+        logs.push(log);
 
-    // 6. Record Attendance
-    await AttendanceLog.create({
-        student: student._id,
-        type: newStatus ? 'entry' : 'exit',
-        location: location || 'Main Gate',
-        scannedBy: req.user._id,
-    });
+        // Update student's "isInside" status for status-based control
+        if (student.profile) {
+            student.profile.isInside = (item.status === 'present');
+            student.profile.lastMovementAt = new Date();
+            await student.save();
+        }
 
-    // 7. Update User State
-    if (student.profile) {
-        student.profile.isInside = newStatus;
-        student.profile.lastMovementAt = new Date();
-        await student.save();
-    }
-
-    // 8. Invalidate Token (Blacklist JTI)
-    await UsedToken.create({
-        jti: decoded.jti,
-        expiresAt: new Date(Date.now() + 60000) // Keep in blacklist for 1 min
-    });
-
-    // 9. Alerting for Abnormal behavior (Audit Log placeholder)
-    if (student.profile?.lastMovementAt && (Date.now() - new Date(student.profile.lastMovementAt).getTime() < 5000)) {
-        console.warn(`WARNING: Rapid movement detected for ${student.name}`);
-        // Flag for review
-    }
-
-    // Notify student via Push/Socket
-    await createNotification(
-        student._id.toString(),
-        `Attendance ${newStatus ? 'Entry' : 'Exit'}`,
-        `Your ${newStatus ? 'entry to' : 'exit from'} the hostel was successful at ${location || 'Main Gate'}.`,
-        newStatus ? 'success' : 'info'
-    );
-
-    // Notify student via Email
-    try {
-        const time = new Date().toLocaleString();
-        const status = newStatus ? 'IN HOSTEL' : 'OUTSIDE';
-        const html = getAttendanceEmail(
-            student.name,
-            newStatus ? 'entry' : 'exit',
-            time,
-            location || 'Main Gate',
-            status
+        // Notify student
+        await createNotification(
+            student._id.toString(),
+            `Night Attendance Marked`,
+            `Your attendance was marked as ${item.status.toUpperCase()} by Warden ${warden.name}.`,
+            item.status === 'present' ? 'success' : 'warning'
         );
 
-        await sendEmail({
-            email: student.email,
-            subject: `Smart HMS: ${newStatus ? 'Entry' : 'Exit'} Recorded`,
-            message: `Hi ${student.name}, Your ${newStatus ? 'entry' : 'exit'} at ${location || 'Main Gate'} was successful.`,
-            html
-        });
-    } catch (e) { }
+        // Optional: Email notification for absence
+        if (item.status === 'absent') {
+            try {
+                const time = new Date().toLocaleString();
+                const html = getAttendanceEmail(
+                    student.name,
+                    'absence',
+                    time,
+                    room.roomNumber,
+                    'ABSENT'
+                );
+
+                await sendEmail({
+                    email: student.email,
+                    subject: `Smart HMS: Absence Recorded`,
+                    message: `Hi ${student.name}, You were marked ABSENT by the Warden during the night round at ${time}.`,
+                    html
+                });
+            } catch (e) { }
+        }
+    }
 
     res.json({
         success: true,
-        message: `${newStatus ? 'Entry' : 'Exit'} recorded for ${student.name}`,
-        student: {
-            name: student.name,
-            id: student.profile?.studentId,
-            status: newStatus ? 'Inside' : 'Outside'
-        }
+        message: `Attendance marked for Room ${room.roomNumber}`,
+        count: logs.length
     });
 });
 
+// @desc    Get attendance summary for Chief Warden
+// @route   GET /api/attendance/chief/summary
+// @access  Private (Chief Warden/Admin)
+export const getChiefWardenStats = asyncHandler(async (req: any, res: Response) => {
+    // Current date range (Today's night round)
+    const start = new Date();
+    start.setHours(0, 0, 0, 0);
+    const end = new Date();
+    end.setHours(23, 59, 59, 999);
+
+    const totalStudents = await User.countDocuments({ role: 'student', isActive: true });
+    
+    const presentLogs = await AttendanceLog.find({
+        type: 'present',
+        createdAt: { $gte: start, $lte: end }
+    }).distinct('student');
+
+    const absentLogs = await AttendanceLog.find({
+        type: 'absent',
+        createdAt: { $gte: start, $lte: end }
+    }).distinct('student');
+
+    res.json({
+        totalStudents,
+        presentCount: presentLogs.length,
+        absentCount: absentLogs.length,
+        pendingCount: totalStudents - (presentLogs.length + absentLogs.length),
+        absentees: await User.find({
+            _id: { $in: absentLogs }
+        }).select('name email profile.roomNumber profile.profileImage profile.studentId')
+    });
+});
+
+// @desc    Get student's own attendance history
+// @route   GET /api/attendance/my
+// @access  Private (Student)
 export const getMyAttendance = asyncHandler(async (req: any, res: Response) => {
-    const logs = await AttendanceLog.find({ student: req.user._id }).sort({ createdAt: -1 }).limit(20);
+    const logs = await AttendanceLog.find({ student: req.user._id })
+        .sort({ createdAt: -1 })
+        .limit(30);
     res.json(logs);
 });

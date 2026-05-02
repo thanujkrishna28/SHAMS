@@ -9,9 +9,9 @@ import {
 
 const router = express.Router();
 
-router.get('/', protect, authorize('admin', 'security'), getParcels);
-router.post('/', protect, authorize('admin', 'security'), receiveParcel);
+router.get('/', protect, authorize('admin', 'security', 'warden', 'chief_warden'), getParcels);
+router.post('/', protect, authorize('admin', 'security', 'warden', 'chief_warden'), receiveParcel);
 router.get('/my', protect, getMyParcels);
-router.post('/:id/deliver', protect, authorize('admin', 'security'), deliverParcel);
+router.post('/:id/deliver', protect, authorize('admin', 'security', 'warden', 'chief_warden'), deliverParcel);
 
 export default router;

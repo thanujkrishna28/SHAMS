@@ -7,40 +7,38 @@ import toast from 'react-hot-toast';
 const API_URL = import.meta.env.VITE_API_BASE_URL || `http://${window.location.hostname}:5000/api`;
 const SOCKET_URL = API_URL.replace(/\/api$/, '');
 
-// Robust notification sound (Standard ping)
-const SOUND_URL = 'https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3';
+// Robust notification sound using Web Audio API (No external assets, no 403s, no cache issues)
+const playNotificationSound = () => {
+    try {
+        const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+        if (!AudioContext) return;
+        const ctx = new AudioContext();
+        const osc = ctx.createOscillator();
+        const gainNode = ctx.createGain();
+        
+        osc.connect(gainNode);
+        gainNode.connect(ctx.destination);
+        
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(880, ctx.currentTime); // A5
+        osc.frequency.exponentialRampToValueAtTime(1760, ctx.currentTime + 0.15); // A6
+        
+        gainNode.gain.setValueAtTime(0, ctx.currentTime);
+        gainNode.gain.linearRampToValueAtTime(0.15, ctx.currentTime + 0.05);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25);
+        
+        osc.start(ctx.currentTime);
+        osc.stop(ctx.currentTime + 0.3);
+    } catch (e) {
+        console.warn('🔇 Audio playback failed:', e);
+    }
+};
 
 export const useSocket = () => {
     const { user } = useAuthStore();
     const socketRef = useRef<Socket | null>(null);
-    const audioRef = useRef<HTMLAudioElement | null>(null);
-    const audioUnlocked = useRef(false);
 
     useEffect(() => {
-        // Initialize audio
-        const audio = new Audio(SOUND_URL);
-        audio.preload = 'auto';
-        audio.volume = 0.5;
-        audioRef.current = audio;
-
-        const unlockAudio = () => {
-            if (audioRef.current && !audioUnlocked.current) {
-                audioRef.current.play()
-                    .then(() => {
-                        audioRef.current?.pause();
-                        if (audioRef.current) audioRef.current.currentTime = 0;
-                        audioUnlocked.current = true;
-                        console.log('✅ Socket Audio Unlocked');
-                        window.removeEventListener('click', unlockAudio);
-                        window.removeEventListener('touchstart', unlockAudio);
-                    })
-                    .catch(e => console.warn('🔇 Audio unlock failed:', e));
-            }
-        };
-
-        window.addEventListener('click', unlockAudio);
-        window.addEventListener('touchstart', unlockAudio);
-
         if (user?._id && !socketRef.current) {
             console.log('🔌 Connecting to Socket Server:', SOCKET_URL);
 
@@ -59,11 +57,8 @@ export const useSocket = () => {
             socketRef.current.on('notification', (notification: any) => {
                 console.log('🔔 Notification Event:', notification);
 
-                // Play Sound
-                if (audioRef.current) {
-                    audioRef.current.currentTime = 0;
-                    audioRef.current.play().catch(e => console.warn('🔇 Playback blocked', e));
-                }
+                // Play Synthesized Sound
+                playNotificationSound();
 
                 // Show Notification
                 toast.custom((t) => (
@@ -103,8 +98,6 @@ export const useSocket = () => {
         }
 
         return () => {
-            window.removeEventListener('click', unlockAudio);
-            window.removeEventListener('touchstart', unlockAudio);
             if (socketRef.current) {
                 socketRef.current.disconnect();
                 socketRef.current = null;

@@ -171,3 +171,13 @@ export const useCreateFee = () => {
         },
     });
 };
+
+export const useAuditLogs = (page = 1, limit = 50) => {
+    return useQuery({
+        queryKey: ['audit-logs', page, limit],
+        queryFn: async () => {
+            const { data } = await api.get(`/admin/audit-logs?page=${page}&limit=${limit}`);
+            return data;
+        },
+    });
+};

@@ -1,6 +1,30 @@
 import { Request, Response } from 'express';
 import asyncHandler from 'express-async-handler';
 import Room, { IRoom } from '../models/Room';
+import { generateRoomRecommendation } from '../utils/aiService';
+
+// @desc    Get AI Room Recommendation
+// @route   POST /api/rooms/recommendation
+// @access  Private (Student)
+export const getRoomRecommendation = asyncHandler(async (req: Request, res: Response) => {
+    const { hostelId, preferences } = req.body;
+
+    // Fetch some available rooms in this hostel
+    const availableRooms = await Room.find({ 
+        hostel: hostelId, 
+        status: { $in: ['Available', 'available'] } 
+    })
+    .populate('block', 'name')
+    .limit(10); // Limit to 10 for AI context
+
+    if (availableRooms.length === 0) {
+        res.json({ recommendation: "No available rooms found for recommendation." });
+        return;
+    }
+
+    const recommendation = await generateRoomRecommendation(preferences, availableRooms);
+    res.json({ recommendation });
+});
 
 // @desc    Get all rooms (optionally filtered by block)
 // @route   GET /api/rooms
@@ -219,7 +243,8 @@ export const lockRoom = asyncHandler(async (req: any, res: Response) => {
     // AND it has capacity
 
     const now = new Date();
-    const tenMinutesFromNow = new Date(now.getTime() + 10 * 60 * 1000);
+    const lockDuration = 80 * 1000; // 80 seconds
+    const expiresAt = new Date(now.getTime() + lockDuration);
 
     const room = await Room.findOneAndUpdate(
         {
@@ -235,7 +260,7 @@ export const lockRoom = asyncHandler(async (req: any, res: Response) => {
             $set: {
                 status: 'locked',
                 lockedBy: userId,
-                lockExpiresAt: tenMinutesFromNow
+                lockExpiresAt: expiresAt
             }
         },
         { new: true }
@@ -257,7 +282,7 @@ export const lockRoom = asyncHandler(async (req: any, res: Response) => {
     }
 
     res.json({
-        message: 'Room reserved for 10 minutes',
+        message: 'Room reserved for 80 seconds',
         room
     });
 });

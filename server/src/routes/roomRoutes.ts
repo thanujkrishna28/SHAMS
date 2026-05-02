@@ -1,5 +1,5 @@
 import express from 'express';
-import { protect, authorize } from '../middleware/authMiddleware';
+import { protect, chiefWarden } from '../middleware/authMiddleware';
 import {
     getRooms,
     getRoomById,
@@ -9,24 +9,26 @@ import {
     updateRoom,
     deleteRoom,
     lockRoom,
-    unlockRoom
+    unlockRoom,
+    getRoomRecommendation
 } from '../controllers/roomController';
 
 const router = express.Router();
 
 router.route('/')
-    .get(protect, getRooms) // Allow students to view rooms too? Usually yes for allocation.
-    .post(protect, authorize('admin'), createRoom);
+    .get(protect, getRooms) 
+    .post(protect, chiefWarden, createRoom);
 
-router.post('/bulk', protect, authorize('admin'), createBulkRooms);
-router.post('/smart-batch', protect, authorize('admin'), createSmartBatch);
+router.post('/bulk', protect, chiefWarden, createBulkRooms);
+router.post('/smart-batch', protect, chiefWarden, createSmartBatch);
+router.post('/recommendation', protect, getRoomRecommendation);
 
 router.route('/:id')
     .get(protect, getRoomById)
-    .put(protect, authorize('admin'), updateRoom)
-    .delete(protect, authorize('admin'), deleteRoom);
+    .put(protect, chiefWarden, updateRoom)
+    .delete(protect, chiefWarden, deleteRoom);
 
-router.post('/:id/lock', protect, lockRoom);
-router.post('/:id/unlock', protect, unlockRoom);
+router.post('/:id/lock', protect, chiefWarden, lockRoom);
+router.post('/:id/unlock', protect, chiefWarden, unlockRoom);
 
 export default router;

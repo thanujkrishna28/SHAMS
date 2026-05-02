@@ -3,9 +3,13 @@ import asyncHandler from 'express-async-handler';
 import Notification from '../models/Notification';
 import User from '../models/User';
 import { emitNotification } from '../utils/socket';
+import { generateSmartNotification } from '../utils/aiService';
 
 export const createNotification = async (recipient: string, title: string, message: string, type: string = 'info') => {
-    const notification = await Notification.create({ recipient, title, message, type });
+    // Attempt to smartly rewrite the notification message
+    const smartMessage = await generateSmartNotification(title, message);
+    
+    const notification = await Notification.create({ recipient, title, message: smartMessage, type });
     emitNotification(recipient, notification);
     return notification;
 };

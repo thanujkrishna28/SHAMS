@@ -14,8 +14,8 @@ export const useStudentFee = () => {
 
 export const useCreatePaymentOrder = () => {
     return useMutation({
-        mutationFn: async () => {
-            const { data } = await api.post('/payments/create-order');
+        mutationFn: async ({ feeId, amountToPay }: { feeId: string, amountToPay: number }) => {
+            const { data } = await api.post('/payments/create-order', { feeId, amountToPay });
             return data;
         },
     });

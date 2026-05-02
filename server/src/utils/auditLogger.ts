@@ -1,12 +1,13 @@
 import AuditLog from '../models/AuditLog';
+import mongoose from 'mongoose';
 
 export const logAudit = async (
     adminId: string,
     action: string,
     targetId: string,
-    targetModel: 'User' | 'Room' | 'Allocation' | 'Complaint' | 'Leave' | 'Visitor' | 'Announcement',
-    details: string = '',
-    ipAddress: string = ''
+    targetModel: string,
+    details?: string,
+    ipAddress?: string
 ) => {
     try {
         await AuditLog.create({
@@ -18,8 +19,26 @@ export const logAudit = async (
             ipAddress
         });
     } catch (error) {
-        console.error('Failed to create audit log:', error);
-        // We don't want to fail the main request if logging fails, just log the error
+        console.error('[AUDIT LOG ERROR]:', error);
     }
 };
 
+interface AuditParams {
+    adminId: string;
+    action: string;
+    targetId: string;
+    targetModel: 'User' | 'Room' | 'Allocation' | 'Complaint' | 'Leave' | 'Visitor' | 'Announcement' | 'Fee';
+    details?: string;
+    ipAddress?: string;
+}
+
+export const logAuditAction = async (params: AuditParams) => {
+    return logAudit(
+        params.adminId,
+        params.action,
+        params.targetId,
+        params.targetModel,
+        params.details,
+        params.ipAddress
+    );
+};

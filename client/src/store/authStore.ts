@@ -6,8 +6,10 @@ interface User {
     _id: string;
     name: string;
     email: string;
-    role: 'admin' | 'student' | 'security';
+    role: 'admin' | 'student' | 'security' | 'warden' | 'chief_warden';
     token: string;
+    createdAt?: string | Date;
+    isMFAEnabled?: boolean;
     profile?: {
         studentId?: string;
         gender?: 'Male' | 'Female';
@@ -34,6 +36,8 @@ interface User {
         lastMovementAt?: string | Date;
         mealPreference?: 'Veg' | 'Non-Veg';
         profileImage?: string;
+        webauthnCredentials?: any[];
+        lastProfileUpdate?: string | Date;
     };
 }
 
@@ -47,6 +51,10 @@ interface AuthState {
     checkAuth: () => void;
     fetchProfile: () => Promise<void>;
     setMealPreference: (preference: 'Veg' | 'Non-Veg') => Promise<void>;
+    verifyMFA: (token: string, userId: string, role: string) => Promise<void>;
+    setMockAuth: (user: any) => void;
+    startWebAuthnRegistration: () => Promise<void>;
+    startWebAuthnLogin: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -80,6 +88,12 @@ export const useAuthStore = create<AuthState>((set) => ({
         try {
             set({ isLoading: true });
             const { data } = await api.post('/auth/login', credentials);
+            
+            if (data.mfaRequired) {
+                set({ isLoading: false });
+                return data; // Return MFA info to the component
+            }
+
             localStorage.setItem('user', JSON.stringify(data));
             set({ user: data, isAuthenticated: true, isLoading: false });
         } catch (error) {
@@ -129,6 +143,78 @@ export const useAuthStore = create<AuthState>((set) => ({
             await fetchProfile(); // Refresh profile state
         } catch (error) {
             console.error('Failed to set meal preference', error);
+            throw error;
+        }
+    },
+
+    verifyMFA: async (token, userId, role) => {
+        try {
+            set({ isLoading: true });
+            const { data } = await api.post('/auth/mfa/verify', { token, userId, role });
+            localStorage.setItem('user', JSON.stringify(data));
+            set({ user: data, isAuthenticated: true, isLoading: false });
+        } catch (error) {
+            set({ isLoading: false });
+            throw error;
+        }
+    },
+
+    setMockAuth: (user) => {
+        // Create a fake token for the demo session
+        const mockUser = { ...user, token: 'demo-biometric-token' };
+        localStorage.setItem('user', JSON.stringify(mockUser));
+        set({ user: mockUser, isAuthenticated: true, isLoading: false });
+    },
+
+    startWebAuthnRegistration: async () => {
+        const { startRegistration } = await import('@simplewebauthn/browser');
+        try {
+            set({ isLoading: true });
+            // 1. Get registration options from server
+            const { data: options } = await api.post('/webauthn/register-options');
+
+            // 2. Trigger browser's native biometric prompt
+            const regResponse = await startRegistration(options);
+
+            // 3. Verify registration with server
+            const { data: verification } = await api.post('/webauthn/register-verify', regResponse);
+
+            if (verification.verified) {
+                set({ isLoading: false });
+            } else {
+                throw new Error('Registration verification failed');
+            }
+        } catch (error) {
+            set({ isLoading: false });
+            throw error;
+        }
+    },
+
+    startWebAuthnLogin: async () => {
+        const { startAuthentication } = await import('@simplewebauthn/browser');
+        try {
+            set({ isLoading: true });
+            // 1. Get authentication options from server (No email needed!)
+            const { data: options } = await api.post('/webauthn/login-options');
+
+            // 2. Trigger browser's native biometric prompt
+            // The browser will "discover" stored credentials on the device
+            const authResponse = await startAuthentication(options);
+
+            // 3. Verify authentication with server
+            const { data: verification } = await api.post('/webauthn/login-verify', {
+                response: authResponse
+            });
+
+            if (verification.verified && verification.user) {
+                localStorage.setItem('user', JSON.stringify(verification.user));
+                set({ user: verification.user, isAuthenticated: true, isLoading: false });
+                return verification.user;
+            } else {
+                throw new Error('Authentication verification failed');
+            }
+        } catch (error: any) {
+            set({ isLoading: false });
             throw error;
         }
     }

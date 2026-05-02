@@ -1,6 +1,11 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Shield, Search, CheckCircle, XCircle, Clock, UserCheck, LogIn, LogOut, Filter } from 'lucide-react';
+import { useState } from 'react';
+import {
+    Search, CheckCircle, XCircle, Clock, UserCheck,
+    LogIn, LogOut, Filter, Calendar,
+    Loader2, RefreshCw,
+    Users, Eye, Phone, Mail, X, ShieldAlert,
+    Activity, History
+} from 'lucide-react';
 import { useAllVisitors, useUpdateVisitorStatus } from '@/hooks/useAdmin';
 import toast from 'react-hot-toast';
 
@@ -8,158 +13,213 @@ const Visitors = () => {
     const [filterStatus, setFilterStatus] = useState('');
     const [filterDate, setFilterDate] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
+    const [selectedVisitor, setSelectedVisitor] = useState<any>(null);
+    const [showDetailsModal, setShowDetailsModal] = useState(false);
 
-    const { data: visitors, isLoading } = useAllVisitors(filterDate, filterStatus);
+    const { data: visitors, isLoading, refetch } = useAllVisitors(filterDate, filterStatus);
     const updateVisitor = useUpdateVisitorStatus();
 
     const handleAction = (id: string, status: string, remarks?: string) => {
         updateVisitor.mutate({ id, status, remarks }, {
-            onSuccess: () => toast.success(`Visitor ${status}`),
-            onError: () => toast.error('Check-in/out failed')
+            onSuccess: () => {
+                toast.success(`Visitor ${status} successfully`);
+                refetch();
+                setShowDetailsModal(false);
+            },
+            onError: () => toast.error('Failed to update visitor status')
         });
+    };
+
+    const handleViewDetails = (visitor: any) => {
+        setSelectedVisitor(visitor);
+        setShowDetailsModal(true);
     };
 
     const filteredVisitors = visitors?.filter((v: any) =>
         v.visitorName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         v.student?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        v.student?.profile?.roomNumber?.toLowerCase().includes(searchTerm.toLowerCase())
+        v.student?.profile?.studentId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        v.phone?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    const metrics = {
+        active: visitors?.filter((v: any) => v.status === 'checked-in').length || 0,
+        pending: visitors?.filter((v: any) => v.status === 'pending').length || 0,
+        approved: visitors?.filter((v: any) => v.status === 'approved').length || 0,
+        total: visitors?.length || 0,
+    };
+
+    if (isLoading) return (
+        <div className="flex items-center justify-center min-h-[400px]">
+            <div className="flex flex-col items-center gap-3">
+                <div className="w-8 h-8 border-2 border-gray-200 border-t-blue-600 rounded-full animate-spin" />
+                <p className="text-xs text-gray-500">Loading visitors...</p>
+            </div>
+        </div>
     );
 
     return (
-        <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="space-y-6"
-        >
-            <div className="flex justify-between items-end">
-                <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Visitor Management</h1>
-                    <p className="text-sm text-gray-500 mt-1">Pre-approvals and security check-ins</p>
+        <div className="space-y-6">
+            {/* Header */}
+            <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                    <div>
+                        <div className="flex items-center gap-3 mb-2">
+                            <h1 className="text-2xl font-bold text-gray-900">Visitor Management</h1>
+                            <span className="px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded">Live</span>
+                        </div>
+                        <p className="text-gray-500 text-sm">Monitor and manage campus visitors</p>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                        <div className="relative">
+                            <Calendar size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                            <input
+                                type="date"
+                                className="pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                onChange={(e) => setFilterDate(e.target.value)}
+                            />
+                        </div>
+                        <button
+                            onClick={() => refetch()}
+                            className="p-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors"
+                        >
+                            <RefreshCw size={16} />
+                        </button>
+                    </div>
                 </div>
-                <div className="flex gap-3">
+
+                {/* Stats */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 pt-6 border-t border-gray-100">
+                    <div className="flex items-center gap-3">
+                        <div className="p-2 bg-green-100 rounded-lg">
+                            <LogIn size={18} className="text-green-600" />
+                        </div>
+                        <div>
+                            <p className="text-xs text-gray-500">Active Inside</p>
+                            <p className="text-xl font-bold text-gray-900">{metrics.active}</p>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <div className="p-2 bg-amber-100 rounded-lg">
+                            <Clock size={18} className="text-amber-600" />
+                        </div>
+                        <div>
+                            <p className="text-xs text-gray-500">Pending</p>
+                            <p className="text-xl font-bold text-gray-900">{metrics.pending}</p>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <div className="p-2 bg-blue-100 rounded-lg">
+                            <ShieldAlert size={18} className="text-blue-600" />
+                        </div>
+                        <div>
+                            <p className="text-xs text-gray-500">Approved</p>
+                            <p className="text-xl font-bold text-gray-900">{metrics.approved}</p>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <div className="p-2 bg-gray-100 rounded-lg">
+                            <History size={18} className="text-gray-600" />
+                        </div>
+                        <div>
+                            <p className="text-xs text-gray-500">Total</p>
+                            <p className="text-xl font-bold text-gray-900">{metrics.total}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Filters */}
+            <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2">
+                            <Filter size={16} className="text-gray-400" />
+                            <select
+                                className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                value={filterStatus}
+                                onChange={(e) => setFilterStatus(e.target.value)}
+                            >
+                                <option value="">All Status</option>
+                                <option value="pending">Pending</option>
+                                <option value="approved">Approved</option>
+                                <option value="checked-in">Checked In</option>
+                                <option value="departed">Departed</option>
+                            </select>
+                        </div>
+                    </div>
+
                     <div className="relative">
+                        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                         <input
-                            type="date"
-                            className="pl-3 pr-4 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500/20"
-                            onChange={(e) => setFilterDate(e.target.value)}
+                            type="text"
+                            placeholder="Search by name, host, or phone..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm w-64 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                     </div>
                 </div>
             </div>
 
-            {/* Filters & Search */}
-            <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-wrap gap-4 items-center justify-between">
-                <div className="relative flex-1 min-w-[300px]">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                    <input
-                        type="text"
-                        placeholder="Search visitor, student, or room..."
-                        className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                </div>
-                <div className="flex items-center gap-2">
-                    <Filter size={18} className="text-gray-500" />
-                    <select
-                        className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-                        value={filterStatus}
-                        onChange={(e) => setFilterStatus(e.target.value)}
-                    >
-                        <option value="">All Statuses</option>
-                        <option value="pending">Pending</option>
-                        <option value="approved">Approved</option>
-                        <option value="checked-in">Checked In</option>
-                        <option value="departed">Departed</option>
-                        <option value="rejected">Rejected</option>
-                    </select>
-                </div>
-            </div>
-
-            {/* Visitors List */}
+            {/* Visitors Table */}
             <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">
-                    <table className="w-full text-left">
+                    <table className="w-full">
                         <thead className="bg-gray-50 border-b border-gray-200">
                             <tr>
-                                <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Visitor Details</th>
-                                <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Student Control</th>
-                                <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Timing</th>
-                                <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-                                <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">Actions</th>
+                                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Visitor</th>
+                                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Host Student</th>
+                                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Visit Info</th>
+                                <th className="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                                <th className="px-6 py-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Action</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
-                            {isLoading ? (
-                                <tr><td colSpan={5} className="p-8 text-center text-gray-500">Loading visitors...</td></tr>
-                            ) : filteredVisitors?.length === 0 ? (
-                                <tr><td colSpan={5} className="p-8 text-center text-gray-500">No visitors found matching filters.</td></tr>
+                            {filteredVisitors?.length === 0 ? (
+                                <tr>
+                                    <td colSpan={5} className="px-6 py-12 text-center">
+                                        <Activity size={32} className="text-gray-300 mx-auto mb-3" />
+                                        <p className="text-sm text-gray-500">No visitor records found</p>
+                                    </td>
+                                </tr>
                             ) : (
                                 filteredVisitors?.map((visitor: any) => (
-                                    <tr key={visitor._id} className="hover:bg-gray-50/50 transition-colors">
+                                    <tr
+                                        key={visitor._id}
+                                        className="hover:bg-gray-50 transition-colors cursor-pointer"
+                                        onClick={() => handleViewDetails(visitor)}
+                                    >
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold">
+                                                <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-gray-600 font-semibold">
                                                     {visitor.visitorName.charAt(0)}
                                                 </div>
                                                 <div>
-                                                    <div className="font-medium text-gray-900">{visitor.visitorName}</div>
-                                                    <div className="text-xs text-gray-500 capitalize">{visitor.relation}</div>
+                                                    <p className="text-sm font-medium text-gray-900">{visitor.visitorName}</p>
+                                                    <p className="text-xs text-gray-500">{visitor.relation}</p>
                                                 </div>
                                             </div>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <div className="text-sm text-gray-900">{visitor.student?.name}</div>
-                                            <div className="text-xs text-gray-500">Room {visitor.student?.profile?.roomNumber || 'N/A'} • {visitor.student?.profile?.studentId}</div>
+                                            <p className="text-sm font-medium text-gray-900">{visitor.student?.name}</p>
+                                            <p className="text-xs text-gray-500">{visitor.student?.profile?.studentId}</p>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <div className="flex flex-col text-sm">
-                                                <span className="font-medium text-gray-900">{new Date(visitor.visitDate).toLocaleDateString()}</span>
-                                                <span className="text-xs text-gray-500">Expected: {visitor.expectedTime}</span>
-                                                {visitor.checkInTime && <span className="text-xs text-green-600 font-medium">In: {new Date(visitor.checkInTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>}
-                                                {visitor.checkOutTime && <span className="text-xs text-red-600 font-medium">Out: {new Date(visitor.checkOutTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>}
+                                            <div className="flex items-center gap-1 text-sm text-gray-700">
+                                                <Clock size={14} className="text-gray-400" />
+                                                <span>{visitor.expectedTime}</span>
                                             </div>
+                                            <p className="text-xs text-gray-500 mt-1">{new Date(visitor.visitDate).toLocaleDateString()}</p>
                                         </td>
-                                        <td className="px-6 py-4">
+                                        <td className="px-6 py-4 text-center">
                                             <StatusBadge status={visitor.status} />
                                         </td>
                                         <td className="px-6 py-4 text-right">
-                                            <div className="flex justify-end gap-2">
-                                                {visitor.status === 'pending' && (
-                                                    <>
-                                                        <button
-                                                            onClick={() => handleAction(visitor._id, 'approved')}
-                                                            className="p-1.5 text-green-600 hover:bg-green-50 rounded-lg tooltip"
-                                                            title="Approve"
-                                                        >
-                                                            <CheckCircle size={18} />
-                                                        </button>
-                                                        <button
-                                                            onClick={() => handleAction(visitor._id, 'rejected')}
-                                                            className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg tooltip"
-                                                            title="Reject"
-                                                        >
-                                                            <XCircle size={18} />
-                                                        </button>
-                                                    </>
-                                                )}
-                                                {visitor.status === 'approved' && (
-                                                    <button
-                                                        onClick={() => handleAction(visitor._id, 'checked-in')}
-                                                        className="px-3 py-1.5 bg-indigo-600 text-white text-xs font-medium rounded-lg hover:bg-indigo-700 flex items-center gap-1.5 ml-auto"
-                                                    >
-                                                        <LogIn size={14} /> Check In
-                                                    </button>
-                                                )}
-                                                {visitor.status === 'checked-in' && (
-                                                    <button
-                                                        onClick={() => handleAction(visitor._id, 'departed')}
-                                                        className="px-3 py-1.5 bg-amber-500 text-white text-xs font-medium rounded-lg hover:bg-amber-600 flex items-center gap-1.5 ml-auto"
-                                                    >
-                                                        <LogOut size={14} /> Check Out
-                                                    </button>
-                                                )}
-                                            </div>
+                                            <button className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                                                <Eye size={16} />
+                                            </button>
                                         </td>
                                     </tr>
                                 ))
@@ -168,26 +228,153 @@ const Visitors = () => {
                     </table>
                 </div>
             </div>
-        </motion.div>
+
+            {/* Visitor Details Modal */}
+            {showDetailsModal && selectedVisitor && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30">
+                    <div className="bg-white rounded-xl w-full max-w-2xl shadow-xl max-h-[90vh] overflow-y-auto">
+                        <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between bg-gray-50 sticky top-0">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 bg-gray-800 rounded-lg">
+                                    <ShieldAlert size={18} className="text-white" />
+                                </div>
+                                <div>
+                                    <h2 className="text-sm font-bold text-gray-900">Visitor Details</h2>
+                                    <p className="text-xs text-gray-500">Access request information</p>
+                                </div>
+                            </div>
+                            <button onClick={() => setShowDetailsModal(false)} className="p-1.5 text-gray-400 hover:text-gray-600 rounded-lg">
+                                <X size={18} />
+                            </button>
+                        </div>
+
+                        <div className="p-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {/* Visitor Info */}
+                                <div>
+                                    <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
+                                        <Users size={14} /> Visitor Information
+                                    </h3>
+                                    <div className="space-y-4">
+                                        <div>
+                                            <p className="text-xs text-gray-500">Full Name</p>
+                                            <p className="text-sm font-medium text-gray-900">{selectedVisitor.visitorName}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-xs text-gray-500">Relation to Student</p>
+                                            <p className="text-sm text-gray-700">{selectedVisitor.relation}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-xs text-gray-500">Phone Number</p>
+                                            <p className="text-sm text-gray-700">{selectedVisitor.phone || 'Not provided'}</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Visit Info */}
+                                <div>
+                                    <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
+                                        <Clock size={14} /> Visit Details
+                                    </h3>
+                                    <div className="space-y-4">
+                                        <div>
+                                            <p className="text-xs text-gray-500">Visit Date</p>
+                                            <p className="text-sm font-medium text-gray-900">{new Date(selectedVisitor.visitDate).toLocaleDateString()}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-xs text-gray-500">Expected Time</p>
+                                            <p className="text-sm text-gray-700">{selectedVisitor.expectedTime}</p>
+                                        </div>
+                                        {selectedVisitor.checkInTime && (
+                                            <div>
+                                                <p className="text-xs text-gray-500">Check-in Time</p>
+                                                <p className="text-sm text-green-600">{new Date(selectedVisitor.checkInTime).toLocaleString()}</p>
+                                            </div>
+                                        )}
+                                        {selectedVisitor.checkOutTime && (
+                                            <div>
+                                                <p className="text-xs text-gray-500">Check-out Time</p>
+                                                <p className="text-sm text-gray-600">{new Date(selectedVisitor.checkOutTime).toLocaleString()}</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Host Student Info */}
+                                <div className="md:col-span-2">
+                                    <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
+                                        <UserCheck size={14} /> Host Student
+                                    </h3>
+                                    <div className="bg-gray-50 rounded-lg p-4">
+                                        <p className="font-medium text-gray-900">{selectedVisitor.student?.name}</p>
+                                        <p className="text-sm text-gray-500">{selectedVisitor.student?.profile?.studentId}</p>
+                                        <p className="text-sm text-gray-500 mt-1">{selectedVisitor.student?.email}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Action Buttons */}
+                            <div className="mt-6 pt-6 border-t border-gray-200">
+                                {selectedVisitor.status === 'pending' && (
+                                    <div className="flex gap-3">
+                                        <button
+                                            onClick={() => handleAction(selectedVisitor._id, 'rejected')}
+                                            className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors"
+                                        >
+                                            Reject
+                                        </button>
+                                        <button
+                                            onClick={() => handleAction(selectedVisitor._id, 'approved')}
+                                            className="flex-1 px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors"
+                                        >
+                                            Approve Entry
+                                        </button>
+                                    </div>
+                                )}
+                                {selectedVisitor.status === 'approved' && (
+                                    <button
+                                        onClick={() => handleAction(selectedVisitor._id, 'checked-in')}
+                                        className="w-full px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+                                    >
+                                        <LogIn size={16} />
+                                        Check In
+                                    </button>
+                                )}
+                                {selectedVisitor.status === 'checked-in' && (
+                                    <button
+                                        onClick={() => handleAction(selectedVisitor._id, 'departed')}
+                                        className="w-full px-4 py-2 bg-gray-600 text-white text-sm font-medium rounded-lg hover:bg-gray-700 transition-colors flex items-center justify-center gap-2"
+                                    >
+                                        <LogOut size={16} />
+                                        Check Out
+                                    </button>
+                                )}
+                                <p className="text-xs text-center text-gray-400 mt-4">
+                                    All actions are logged for security audit
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
     );
 };
 
 const StatusBadge = ({ status }: { status: string }) => {
-    const styles: any = {
-        pending: 'bg-yellow-100 text-yellow-700 border-yellow-200',
-        approved: 'bg-blue-100 text-blue-700 border-blue-200',
-        rejected: 'bg-red-100 text-red-700 border-red-200',
-        'checked-in': 'bg-green-100 text-green-700 border-green-200',
-        departed: 'bg-gray-100 text-gray-700 border-gray-200',
+    const config: any = {
+        pending: { label: 'Pending', className: 'bg-amber-100 text-amber-700' },
+        approved: { label: 'Approved', className: 'bg-blue-100 text-blue-700' },
+        rejected: { label: 'Rejected', className: 'bg-red-100 text-red-700' },
+        'checked-in': { label: 'Checked In', className: 'bg-green-100 text-green-700' },
+        departed: { label: 'Departed', className: 'bg-gray-100 text-gray-700' },
     };
 
+    const current = config[status] || config.pending;
+
     return (
-        <span className={`px-2.5 py-1 rounded-full text-xs font-medium border ${styles[status] || styles.pending} capitalize inline-flex items-center gap-1.5`}>
-            {status === 'pending' && <Clock size={12} />}
-            {status === 'approved' && <UserCheck size={12} />}
-            {status === 'checked-in' && <LogIn size={12} />}
-            {status === 'departed' && <LogOut size={12} />}
-            {status}
+        <span className={`inline-flex px-2 py-1 text-xs font-medium rounded ${current.className}`}>
+            {current.label}
         </span>
     );
 };

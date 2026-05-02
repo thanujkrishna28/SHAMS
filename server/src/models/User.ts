@@ -5,15 +5,15 @@ export interface IUser extends Document {
     name: string;
     email: string;
     password?: string;
-    role: 'student' | 'guardian' | 'security';
+    role: 'student' | 'guardian';
     profile?: {
-        // specific to student
         studentId?: string;
         gender?: 'Male' | 'Female';
         branch?: string;
-        room?: mongoose.Types.ObjectId; // Reference to Room model
-        roomNumber?: string; // Keep for quick access/display if populated
+        room?: mongoose.Types.ObjectId; 
+        roomNumber?: string; 
         block?: string;
+        hostel?: mongoose.Types.ObjectId;
         course?: string;
         year?: number;
         guardianName?: string;
@@ -36,8 +36,20 @@ export interface IUser extends Document {
         lastMovementAt?: Date;
         mealPreference?: 'Veg' | 'Non-Veg';
         profileImage?: string;
+        lastProfileUpdate?: Date;
         specialDiet?: string;
         allergies?: string[];
+        resetPasswordOTP?: string;
+        resetPasswordExpires?: Date;
+        mfaSecret?: string;
+        isMFAEnabled?: boolean;
+        webauthnCredentials?: Array<{
+            credentialID: string;
+            publicKey: string;
+            counter: number;
+            deviceType: string;
+            transports?: string[];
+        }>;
     };
     isActive: boolean;
     createdAt: Date;
@@ -52,7 +64,7 @@ const UserSchema: Schema = new Schema(
         password: { type: String, required: true },
         role: {
             type: String,
-            enum: ['student', 'guardian', 'security'],
+            enum: ['student', 'guardian'],
             default: 'student',
         },
         profile: {
@@ -62,6 +74,7 @@ const UserSchema: Schema = new Schema(
             room: { type: Schema.Types.ObjectId, ref: 'Room' },
             roomNumber: String,
             block: String,
+            hostel: { type: Schema.Types.ObjectId, ref: 'Hostel' },
             course: String,
             year: Number,
             guardianName: String,
@@ -84,8 +97,20 @@ const UserSchema: Schema = new Schema(
             lastMovementAt: { type: Date },
             mealPreference: { type: String, enum: ['Veg', 'Non-Veg'] },
             profileImage: { type: String },
+            lastProfileUpdate: { type: Date },
             specialDiet: { type: String }, // e.g. 'Gluten-Free', 'Vegan'
-            allergies: { type: [String] } // e.g. ['Peanuts', 'Dairy']
+            allergies: { type: [String] }, // e.g. ['Peanuts', 'Dairy']
+            resetPasswordOTP: { type: String },
+            resetPasswordExpires: { type: Date },
+            mfaSecret: { type: String, select: false },
+            isMFAEnabled: { type: Boolean, default: false },
+            webauthnCredentials: [{
+                credentialID: String,
+                publicKey: String,
+                counter: Number,
+                deviceType: String,
+                transports: [String]
+            }]
         },
         isActive: { type: Boolean, default: true },
     },
