@@ -194,18 +194,18 @@ const AdminLogin = () => {
     ];
 
     return (
-        <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-gradient-to-br from-gray-50 via-indigo-50/20 to-blue-50/30">
+        <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-gradient-to-br from-gray-50 via-indigo-50/20 to-blue-50/30 overflow-y-auto">
             {/* LEFT SECTION - FORM */}
-            <div className="flex items-center justify-center p-6 lg:p-8 order-2 lg:order-1">
+            <div className="flex items-start sm:items-center justify-center p-4 sm:p-6 lg:p-8 order-2 lg:order-1">
                 <div className="w-full max-w-md">
                     <motion.div
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.5 }}
-                        className="bg-white rounded-2xl shadow-xl p-6 lg:p-8"
+                        className="bg-white rounded-2xl shadow-xl p-5 sm:p-6 lg:p-8"
                     >
                         {/* Logo */}
-                        <div className="flex items-center gap-2 mb-6">
+                        <div className="flex items-center gap-2 mb-5 sm:mb-6">
                             <div className="w-10 h-10 bg-gradient-to-br from-indigo-600 to-indigo-700 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-600/25">
                                 <Shield size={20} className="text-white" />
                             </div>

@@ -311,17 +311,34 @@ const Register = () => {
             </div>
 
             {/* RIGHT SECTION - FORM */}
-            <div className="flex items-center justify-center p-6 lg:p-8 overflow-y-auto">
+            <div className="flex items-start lg:items-center justify-center p-4 sm:p-6 lg:p-8 overflow-y-auto">
                 <div className="w-full max-w-lg">
                     <div className="bg-white rounded-2xl shadow-xl p-6 lg:p-8">
                         {/* Mobile Header */}
-                        <div className="lg:hidden text-center mb-6">
-                            <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-indigo-50 rounded-full mb-3">
-                                <Shield size={14} className="text-indigo-600" />
-                                <span className="text-[9px] font-bold text-indigo-600">STEP {step} OF 3</span>
+                        <div className="lg:hidden mb-5">
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="w-10 h-10 bg-gradient-to-br from-indigo-600 to-indigo-700 rounded-xl flex items-center justify-center shadow-lg">
+                                    <Shield size={20} className="text-white" />
+                                </div>
+                                <div>
+                                    <span className="font-bold text-gray-900 text-lg tracking-tight">SHAMS</span>
+                                    <p className="text-[10px] text-gray-500">Smart Hostel Management System</p>
+                                </div>
                             </div>
-                            <h2 className="text-xl font-bold text-gray-900">Create Student Account</h2>
-                            <p className="text-xs text-gray-500 mt-1">Complete your profile in 3 simple steps</p>
+                            {/* Step progress bar - mobile */}
+                            <div className="flex items-center gap-2 mb-1">
+                                {stepInfo.map((item, idx) => (
+                                    <div key={idx} className="flex-1">
+                                        <div className={`h-1.5 rounded-full transition-all ${
+                                            step > idx + 1 ? 'bg-emerald-500' : step === idx + 1 ? 'bg-indigo-500' : 'bg-gray-200'
+                                        }`} />
+                                        <p className={`text-[9px] mt-1 font-semibold ${
+                                            step === idx + 1 ? 'text-indigo-600' : 'text-gray-400'
+                                        }`}>{item.title}</p>
+                                    </div>
+                                ))}
+                            </div>
+                            <p className="text-[10px] text-gray-500">Step {step} of 3</p>
                         </div>
 
                         <AnimatePresence mode="wait">

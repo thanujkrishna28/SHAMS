@@ -231,9 +231,9 @@ const Login = () => {
     };
 
     return (
-        <div className="min-h-screen w-full flex flex-col lg:flex-row bg-gradient-to-br from-gray-50 via-indigo-50/20 to-blue-50/30">
-            {/* LEFT SECTION - BRANDING - RESPONSIVE */}
-            <div className="lg:w-1/2 relative overflow-hidden bg-white shadow-xl p-6 lg:p-8 flex flex-col">
+        <div className="min-h-screen w-full flex flex-col lg:flex-row bg-gradient-to-br from-gray-50 via-indigo-50/20 to-blue-50/30 overflow-y-auto">
+            {/* LEFT SECTION - BRANDING - DESKTOP ONLY */}
+            <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-white shadow-xl p-6 lg:p-8 flex-col">
                 {/* Background decoration */}
                 <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/50 via-transparent to-purple-50/50" />
 
@@ -307,9 +307,20 @@ const Login = () => {
                 </div>
             </div>
 
-            {/* RIGHT SECTION - LOGIN FORM - RESPONSIVE */}
-            <div className="flex-1 flex items-center justify-center p-4 lg:p-8">
+            {/* RIGHT SECTION - LOGIN FORM */}
+            <div className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-8 min-h-screen lg:min-h-0">
                 <div className="w-full max-w-md">
+
+                    {/* Mobile-only compact header */}
+                    <div className="lg:hidden flex items-center gap-3 mb-6 px-1">
+                        <div className="w-10 h-10 bg-gradient-to-br from-indigo-600 to-indigo-500 rounded-xl shadow-lg flex items-center justify-center">
+                            <Shield size={20} className="text-white" />
+                        </div>
+                        <div>
+                            <h1 className="text-xl font-bold text-gray-900">SHAMS</h1>
+                            <p className="text-[10px] text-gray-500 font-medium tracking-wide">SMART HOSTEL SYSTEM</p>
+                        </div>
+                    </div>
                     <AnimatePresence mode="wait">
                         {!isSuccess ? (
                             <motion.div
