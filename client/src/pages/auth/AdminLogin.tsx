@@ -204,14 +204,25 @@ const AdminLogin = () => {
                         transition={{ duration: 0.5 }}
                         className="bg-white rounded-2xl shadow-xl p-5 sm:p-6 lg:p-8"
                     >
-                        {/* Logo */}
-                        <div className="flex items-center gap-2 mb-5 sm:mb-6">
-                            <div className="w-10 h-10 overflow-hidden rounded-xl flex items-center justify-center shadow-lg bg-white">
+                        {/* Logo - Mobile Only */}
+                        <div className="lg:hidden flex flex-col items-center mb-8">
+                            <div className="w-20 h-20 overflow-hidden rounded-3xl shadow-2xl flex items-center justify-center bg-white border-4 border-indigo-50/50 mb-4">
+                                <img src="/logo.png" alt="SHAMS Logo" className="w-full h-full object-cover" />
+                            </div>
+                            <div className="text-center">
+                                <h1 className="text-2xl font-bold text-gray-900 tracking-tight">SHAMS</h1>
+                                <p className="text-[10px] text-indigo-600 font-bold tracking-[0.2em] uppercase">Staff Portal</p>
+                            </div>
+                        </div>
+
+                        {/* Logo - Desktop Only */}
+                        <div className="hidden lg:flex items-center gap-2 mb-6">
+                            <div className="w-10 h-10 overflow-hidden rounded-xl flex items-center justify-center shadow-lg bg-white border border-gray-100">
                                 <img src="/logo.png" alt="SHAMS Logo" className="w-full h-full object-cover" />
                             </div>
                             <div>
                                 <span className="font-bold text-gray-900 text-lg tracking-tight">SHAMS</span>
-                                <p className="text-[9px] text-gray-500">Smart Hostel Management System</p>
+                                <p className="text-[10px] text-gray-500">Staff Portal</p>
                             </div>
                         </div>
 

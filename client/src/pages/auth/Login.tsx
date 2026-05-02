@@ -246,12 +246,12 @@ const Login = () => {
                         className="mb-6 lg:mb-8"
                     >
                         <div className="flex items-center gap-3">
-                            <div className="w-12 h-12 lg:w-14 lg:h-14 overflow-hidden rounded-xl shadow-lg flex items-center justify-center bg-white">
+                            <div className="w-14 h-14 overflow-hidden rounded-2xl shadow-lg flex items-center justify-center bg-white border border-gray-100">
                                 <img src="/logo.png" alt="SHAMS Logo" className="w-full h-full object-cover" />
                             </div>
                             <div>
-                                <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">SHAMS</h1>
-                                <p className="text-xs text-gray-500 font-medium tracking-wide">SMART HOSTEL SYSTEM</p>
+                                <h1 className="text-3xl font-bold text-gray-900">SHAMS</h1>
+                                <p className="text-xs text-gray-500 font-bold tracking-[0.2em] uppercase">SMART HOSTEL SYSTEM</p>
                             </div>
                         </div>
                     </motion.div>
@@ -312,13 +312,13 @@ const Login = () => {
                 <div className="w-full max-w-md">
 
                     {/* Mobile-only compact header */}
-                    <div className="lg:hidden flex items-center gap-3 mb-6 px-1">
-                        <div className="w-10 h-10 overflow-hidden rounded-xl shadow-lg flex items-center justify-center bg-white">
+                    <div className="lg:hidden flex flex-col items-center gap-3 mb-8">
+                        <div className="w-24 h-24 overflow-hidden rounded-3xl shadow-2xl flex items-center justify-center bg-white border-4 border-indigo-50/50">
                             <img src="/logo.png" alt="SHAMS Logo" className="w-full h-full object-cover" />
                         </div>
-                        <div>
-                            <h1 className="text-xl font-bold text-gray-900">SHAMS</h1>
-                            <p className="text-[10px] text-gray-500 font-medium tracking-wide">SMART HOSTEL SYSTEM</p>
+                        <div className="text-center">
+                            <h1 className="text-3xl font-bold text-gray-900 tracking-tight">SHAMS</h1>
+                            <p className="text-[10px] text-indigo-600 font-bold tracking-[0.2em] uppercase">Smart Hostel System</p>
                         </div>
                     </div>
                     <AnimatePresence mode="wait">

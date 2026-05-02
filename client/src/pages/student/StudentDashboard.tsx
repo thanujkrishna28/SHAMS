@@ -106,13 +106,20 @@ const StudentDashboard = () => {
                 {/* Header Section */}
                 <div className="mb-8">
                     <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                        <div>
-                            <div className="flex items-center gap-2 text-sm text-gray-500 mb-1">
-                                <span className="font-mono">STUDENT PORTAL</span>
-                                <span className="text-gray-300">|</span>
-                                <span>Academic Year 2024-25</span>
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                            <div className="w-16 h-16 rounded-2xl overflow-hidden shadow-xl bg-white border border-gray-100 flex-shrink-0 hidden sm:flex items-center justify-center">
+                                <img src="/logo.png" alt="Logo" className="w-full h-full object-cover" />
                             </div>
-                            <h1 className="text-2xl sm:text-3xl font-light text-gray-900 tracking-tight">
+                            <div>
+                                <div className="flex items-center gap-2 text-sm text-gray-500 mb-1">
+                                    <div className="sm:hidden w-6 h-6 rounded-md overflow-hidden bg-white border border-gray-100 flex items-center justify-center">
+                                        <img src="/logo.png" alt="Logo" className="w-full h-full object-cover" />
+                                    </div>
+                                    <span className="font-mono">STUDENT PORTAL</span>
+                                    <span className="text-gray-300">|</span>
+                                    <span>Academic Year 2024-25</span>
+                                </div>
+                                <h1 className="text-2xl sm:text-3xl font-light text-gray-900 tracking-tight">
                                 Welcome back,{' '}
                                 <span className="font-semibold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
                                     {user?.name?.split(' ')[0] || 'Student'}

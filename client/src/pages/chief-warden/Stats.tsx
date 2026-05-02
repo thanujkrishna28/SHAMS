@@ -69,12 +69,17 @@ const Stats = () => {
             {/* Header */}
             <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
                 <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-                    <div>
-                        <div className="flex items-center gap-3 mb-2">
-                            <h1 className="text-2xl font-bold text-gray-900">Command Center</h1>
-                            <span className="px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded">Live</span>
+                    <div className="flex items-center gap-4">
+                        <div className="w-14 h-14 rounded-2xl overflow-hidden bg-white border border-gray-100 shadow-lg flex-shrink-0 flex items-center justify-center">
+                            <img src="/logo.png" alt="Logo" className="w-full h-full object-cover" />
                         </div>
-                        <p className="text-gray-500 text-sm">Real-time attendance monitoring and announcements</p>
+                        <div>
+                            <div className="flex items-center gap-3 mb-1">
+                                <h1 className="text-2xl font-bold text-gray-900">Command Center</h1>
+                                <span className="px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded">Live</span>
+                            </div>
+                            <p className="text-gray-500 text-sm">Real-time attendance monitoring and announcements</p>
+                        </div>
                     </div>
 
                     <div className="flex gap-3">

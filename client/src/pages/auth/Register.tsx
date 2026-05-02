@@ -315,15 +315,13 @@ const Register = () => {
                 <div className="w-full max-w-lg">
                     <div className="bg-white rounded-2xl shadow-xl p-6 lg:p-8">
                         {/* Mobile Header */}
-                        <div className="lg:hidden mb-5">
-                            <div className="flex items-center gap-3 mb-4">
-                                <div className="w-10 h-10 overflow-hidden rounded-xl flex items-center justify-center shadow-lg bg-white">
-                                    <img src="/logo.png" alt="SHAMS Logo" className="w-full h-full object-cover" />
-                                </div>
-                                <div>
-                                    <span className="font-bold text-gray-900 text-lg tracking-tight">SHAMS</span>
-                                    <p className="text-[10px] text-gray-500">Smart Hostel Management System</p>
-                                </div>
+                        <div className="lg:hidden flex flex-col items-center mb-8">
+                            <div className="w-20 h-20 overflow-hidden rounded-3xl shadow-2xl flex items-center justify-center bg-white border-4 border-indigo-50/50 mb-4">
+                                <img src="/logo.png" alt="SHAMS Logo" className="w-full h-full object-cover" />
+                            </div>
+                            <div className="text-center">
+                                <h1 className="text-2xl font-bold text-gray-900 tracking-tight">SHAMS</h1>
+                                <p className="text-[10px] text-indigo-600 font-bold tracking-[0.2em] uppercase mb-4">Smart Hostel System</p>
                             </div>
                             {/* Step progress bar - mobile */}
                             <div className="flex items-center gap-2 mb-1">
