@@ -43,7 +43,7 @@ const useTypingAnimation = (texts: string[], typingSpeed = 100, deletingSpeed = 
 // Feature data
 const features = [
     {
-        icon: <Shield size={18} />,
+        icon: <div className="w-4 h-4 overflow-hidden rounded-sm flex items-center justify-center"><img src="/logo.png" className="w-full h-full object-cover" /></div>,
         title: 'Secure & Reliable',
         description: 'Enterprise-grade security',
         color: 'indigo',
@@ -578,7 +578,7 @@ const Login = () => {
                                                             <p className="text-xs text-gray-500">Access the admin control panel</p>
                                                         </div>
                                                     </div>
-                                                    <Shield size={16} className="text-gray-400 group-hover:text-indigo-600 group-hover:translate-x-0.5 transition-all" />
+                                                    <Building2 size={16} className="text-gray-400 group-hover:text-indigo-600 group-hover:translate-x-0.5 transition-all" />
                                                 </div>
                                             </Link>
                                         </div>
@@ -595,8 +595,10 @@ const Login = () => {
                                     </form>
                                 ) : (
                                     <form onSubmit={handleMFAVerify} className="space-y-6">
-                                        <div className="relative group">
-                                            <Shield size={20} className={`absolute left-3 top-1/2 -translate-y-1/2 transition-colors ${focusedField === 'mfa' ? 'text-indigo-600' : 'text-gray-400'}`} />
+                                            <div className="relative group">
+                                                <div className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center">
+                                                    <img src="/logo.png" className="w-full h-full object-contain opacity-50" />
+                                                </div>
                                             <input
                                                 type="text"
                                                 placeholder="000 000"
@@ -626,7 +628,9 @@ const Login = () => {
                                             ) : (
                                                 <>
                                                     <span>VERIFY & LOGIN</span>
-                                                    <Shield size={18} className="group-hover:scale-110 transition-transform" />
+                                                    <div className="w-4 h-4 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                                        <img src="/logo.png" className="w-full h-full object-contain brightness-0 invert" />
+                                                    </div>
                                                 </>
                                             )}
                                         </motion.button>

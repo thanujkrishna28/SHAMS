@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import {
     Bell, User, Lock, Save, Globe,
     Smartphone, Server, Terminal,
-    Unlock, Power, Clock, HelpCircle, AlertTriangle, Bed, Shield
+    Unlock, Power, Clock, HelpCircle, AlertTriangle, Bed, Lock
 } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { useSettings, useUpdateSettings } from '@/hooks/useSettings';
@@ -228,7 +228,7 @@ const Settings = () => {
                                         onClick={() => setShowMFAModal(true)}
                                         className="w-full flex items-center justify-center gap-2 py-2.5 bg-blue-50 text-blue-600 border border-blue-200 rounded-lg font-medium hover:bg-blue-100 transition-colors text-sm"
                                     >
-                                        <Shield size={14} />
+                                        <Lock size={14} />
                                         Enable Two-Factor Auth
                                     </button>
                                 ) : (

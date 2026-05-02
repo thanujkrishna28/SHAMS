@@ -168,7 +168,7 @@ const AdminLogin = () => {
 
     const features = [
         {
-            icon: <Shield size={16} />,
+            icon: <div className="w-4 h-4 overflow-hidden rounded-sm flex items-center justify-center"><img src="/logo.png" className="w-full h-full object-cover" /></div>,
             title: 'Secure & Protected',
             desc: 'Enterprise-grade security ensures your data is always protected.',
             color: 'indigo'
@@ -229,7 +229,9 @@ const AdminLogin = () => {
                         {/* Header */}
                         <div className="mb-6">
                             <div className="inline-flex items-center gap-1.5 px-2 py-1 bg-indigo-50 rounded-full mb-2">
-                                <Shield size={10} className="text-indigo-600" />
+                                <div className="w-3 h-3 flex items-center justify-center">
+                                    <img src="/logo.png" className="w-full h-full object-contain" />
+                                </div>
                                 <span className="text-[8px] font-bold text-indigo-600 uppercase tracking-wider">Admin Portal</span>
                             </div>
                             <h1 className="text-2xl font-bold text-gray-900 mb-1">Welcome Back, Administrator</h1>
@@ -320,7 +322,7 @@ const AdminLogin = () => {
                                                 onChange={(e) => setSecureLogin(e.target.checked)}
                                                 className="w-3 h-3 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
                                             />
-                                            <Shield size={10} className="text-indigo-500 group-hover:text-indigo-600 transition-colors" />
+                                            <Lock size={10} className="text-indigo-500 group-hover:text-indigo-600 transition-colors" />
                                             <span className="text-[10px] text-gray-700 group-hover:text-gray-900 transition-colors">Secure login</span>
                                         </label>
                                     </motion.div>
@@ -364,7 +366,9 @@ const AdminLogin = () => {
                                             6-Digit Authenticator Code
                                         </label>
                                         <div className="relative group">
-                                            <Shield size={18} className={`absolute left-3 top-1/2 -translate-y-1/2 transition-colors ${focusedField === 'mfa' ? 'text-indigo-600' : 'text-gray-400'}`} />
+                                            <div className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 flex items-center justify-center">
+                                                <img src="/logo.png" className="w-full h-full object-contain opacity-50" />
+                                            </div>
                                             <input
                                                 type="text"
                                                 placeholder="000 000"
@@ -436,7 +440,9 @@ const AdminLogin = () => {
                                             <div className="p-8 flex flex-col items-center text-center">
                                                 {/* SHAMS Staff Icon */}
                                                 <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center mb-6 shadow-lg shadow-indigo-600/30">
-                                                    <Shield size={20} className="text-white" />
+                                                    <div className="w-6 h-6 flex items-center justify-center">
+                                                        <img src="/logo.png" className="w-full h-full object-contain brightness-0 invert" />
+                                                    </div>
                                                 </div>
 
                                                 <h3 className="text-lg font-semibold text-gray-900 mb-2">Staff Verification</h3>
@@ -544,7 +550,9 @@ const AdminLogin = () => {
                             transition={{ delay: 0.2 }}
                             className="inline-flex items-center gap-1.5 px-2 py-1 bg-indigo-500/20 backdrop-blur-sm rounded-full w-fit border border-indigo-500/30"
                         >
-                            <Shield size={12} className="text-indigo-400" />
+                            <div className="w-3 h-3 flex items-center justify-center">
+                                <img src="/logo.png" className="w-full h-full object-contain" />
+                            </div>
                             <span className="text-[9px] font-bold text-indigo-300 tracking-wide">ADMIN PORTAL</span>
                         </motion.div>
 

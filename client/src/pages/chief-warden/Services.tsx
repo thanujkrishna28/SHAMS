@@ -8,7 +8,7 @@ import {
     CalendarDays,
     ShieldCheck,
     MessageSquare,
-    Shield,
+    Lock,
     Database,
     ChevronRight,
     Home,
@@ -43,14 +43,14 @@ const Services = () => {
             title: "Operations & Monitoring",
             items: [
                 { name: 'Leaves', path: '/chief-warden/leaves', icon: CalendarDays, color: 'bg-teal-600', desc: 'Student leave requests' },
-                { name: 'Visitors', path: '/chief-warden/visitors', icon: ShieldCheck, color: 'bg-amber-600', desc: 'Visitor gate clearance' },
+                { name: 'Visitors', path: '/chief-warden/visitors', icon: UserCheck, color: 'bg-amber-600', desc: 'Visitor gate clearance' },
                 { name: 'Complaints', path: '/chief-warden/complaints', icon: MessageSquare, color: 'bg-red-600', desc: 'Incident reporting' },
             ]
         },
         {
             title: "Staff & System Control",
             items: [
-                { name: 'Wardens', path: '/chief-warden/wardens', icon: Shield, color: 'bg-gray-700', desc: 'Warden management' },
+                { name: 'Wardens', path: '/chief-warden/wardens', icon: Lock, color: 'bg-gray-700', desc: 'Warden management' },
                 { name: 'Settings', path: '/chief-warden/settings', icon: Database, color: 'bg-gray-500', desc: 'System configuration' },
             ]
         }

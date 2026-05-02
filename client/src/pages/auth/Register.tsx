@@ -145,7 +145,7 @@ const Register = () => {
     ];
 
     const features = [
-        { icon: <Shield size={16} />, title: 'Secure & Reliable', desc: 'Enterprise-grade security', color: 'indigo' },
+        { icon: <div className="w-4 h-4 overflow-hidden rounded-sm flex items-center justify-center"><img src="/logo.png" className="w-full h-full object-cover" /></div>, title: 'Secure & Reliable', desc: 'Enterprise-grade security', color: 'indigo' },
         { icon: <Zap size={16} />, title: 'Seamless Experience', desc: 'Quick onboarding', color: 'emerald' },
         { icon: <Users size={16} />, title: 'Smart Community', desc: 'Connect & grow', color: 'purple' },
         { icon: <Bell size={16} />, title: 'Real-time Updates', desc: 'Instant notifications', color: 'orange' },
@@ -293,7 +293,9 @@ const Register = () => {
                         transition={{ delay: 0.6 }}
                         className="flex items-center gap-2 p-3 bg-indigo-500/10 backdrop-blur-sm rounded-xl border border-indigo-500/20"
                     >
-                        <Shield size={14} className="text-indigo-400" />
+                        <div className="w-4 h-4 flex items-center justify-center">
+                            <img src="/logo.png" className="w-full h-full object-contain opacity-50" />
+                        </div>
                         <p className="text-[10px] text-indigo-300 flex-1">Your data is protected with advanced encryption</p>
                         <CheckCircle size={12} className="text-emerald-400" />
                     </motion.div>
