@@ -299,34 +299,3 @@ const StatusBadge = ({ status }: { status: string }) => {
 };
 
 export default Leaves;
-const current = config[status] || config.pending;
-
-return (
-    <span className={`inline-flex px-3 py-1 text-[9px] font-black uppercase tracking-widest rounded-full shadow-sm ${current.className}`}>
-        {current.label}
-    </span>
-);
-};
-
-        </div >
-    );
-};
-
-const StatusBadge = ({ status }: { status: string }) => {
-    const config: any = {
-        approved: { label: 'Approved', className: 'bg-green-100 text-green-700' },
-        rejected: { label: 'Rejected', className: 'bg-red-100 text-red-700' },
-        recommended: { label: 'Recommended', className: 'bg-blue-100 text-blue-700' },
-        pending: { label: 'Pending', className: 'bg-amber-100 text-amber-700' },
-    };
-
-    const current = config[status] || config.pending;
-
-    return (
-        <span className={`inline-flex px-2 py-1 text-xs font-medium rounded ${current.className}`}>
-            {current.label}
-        </span>
-    );
-};
-
-export default Leaves;

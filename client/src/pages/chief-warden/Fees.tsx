@@ -436,10 +436,4 @@ const StatusBadge = ({ status }: { status: string }) => {
     );
 };
 
-export default Fees; ame = {`inline-flex px-3 py-1 text-[9px] font-black uppercase tracking-widest rounded-full shadow-sm ${current.className}`}>
-    { current.label }
-        </span >
-    );
-};
-
 export default Fees;
