@@ -206,8 +206,8 @@ const AdminLogin = () => {
                     >
                         {/* Logo */}
                         <div className="flex items-center gap-2 mb-5 sm:mb-6">
-                            <div className="w-10 h-10 bg-gradient-to-br from-indigo-600 to-indigo-700 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-600/25">
-                                <Shield size={20} className="text-white" />
+                            <div className="w-10 h-10 overflow-hidden rounded-xl flex items-center justify-center shadow-lg bg-white">
+                                <img src="/logo.png" alt="SHAMS Logo" className="w-full h-full object-cover" />
                             </div>
                             <div>
                                 <span className="font-bold text-gray-900 text-lg tracking-tight">SHAMS</span>
@@ -515,8 +515,8 @@ const AdminLogin = () => {
                         transition={{ duration: 0.4 }}
                         className="flex items-center gap-2"
                     >
-                        <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/25">
-                            <Shield size={20} className="text-white" />
+                        <div className="w-10 h-10 overflow-hidden rounded-xl flex items-center justify-center shadow-lg bg-white">
+                            <img src="/logo.png" alt="SHAMS Logo" className="w-full h-full object-cover" />
                         </div>
                         <div>
                             <span className="font-bold text-white text-xl tracking-tight">SHAMS</span>

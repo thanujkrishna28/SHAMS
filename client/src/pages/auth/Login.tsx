@@ -246,8 +246,8 @@ const Login = () => {
                         className="mb-6 lg:mb-8"
                     >
                         <div className="flex items-center gap-3">
-                            <div className="w-12 h-12 lg:w-14 lg:h-14 bg-gradient-to-br from-indigo-600 to-indigo-500 rounded-xl shadow-lg flex items-center justify-center">
-                                <Shield size={24} className="text-white" />
+                            <div className="w-12 h-12 lg:w-14 lg:h-14 overflow-hidden rounded-xl shadow-lg flex items-center justify-center bg-white">
+                                <img src="/logo.png" alt="SHAMS Logo" className="w-full h-full object-cover" />
                             </div>
                             <div>
                                 <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">SHAMS</h1>
@@ -313,8 +313,8 @@ const Login = () => {
 
                     {/* Mobile-only compact header */}
                     <div className="lg:hidden flex items-center gap-3 mb-6 px-1">
-                        <div className="w-10 h-10 bg-gradient-to-br from-indigo-600 to-indigo-500 rounded-xl shadow-lg flex items-center justify-center">
-                            <Shield size={20} className="text-white" />
+                        <div className="w-10 h-10 overflow-hidden rounded-xl shadow-lg flex items-center justify-center bg-white">
+                            <img src="/logo.png" alt="SHAMS Logo" className="w-full h-full object-cover" />
                         </div>
                         <div>
                             <h1 className="text-xl font-bold text-gray-900">SHAMS</h1>

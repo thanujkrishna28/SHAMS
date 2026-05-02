@@ -71,8 +71,8 @@ const WardenLayout = () => {
                         onClick={() => navigate('/')}
                         className="h-20 flex items-center px-6 gap-3 cursor-pointer border-b border-slate-800/40 hover:bg-slate-800/20 transition-all group"
                     >
-                        <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-900/40 group-hover:scale-105 transition-transform duration-300">
-                            <Shield className="text-white" size={20} />
+                        <div className="w-10 h-10 overflow-hidden rounded-xl flex items-center justify-center shadow-lg bg-white group-hover:scale-105 transition-transform duration-300">
+                            <img src="/logo.png" alt="SHAMS Logo" className="w-full h-full object-cover" />
                         </div>
                         <div>
                             <span className="block font-bold text-white tracking-tight text-sm uppercase">SHAMS</span>
@@ -135,8 +135,8 @@ const WardenLayout = () => {
                 {/* Mobile Header Interface */}
                 <div className="lg:hidden h-16 bg-slate-900 border-b border-slate-800 px-6 flex items-center justify-between shrink-0 shadow-lg z-10">
                     <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center">
-                            <Shield className="text-white" size={16} />
+                        <div className="w-8 h-8 overflow-hidden rounded-lg flex items-center justify-center bg-white">
+                            <img src="/logo.png" alt="SHAMS Logo" className="w-full h-full object-cover" />
                         </div>
                         <span className="text-sm font-bold text-white tracking-widest uppercase">SHAMS</span>
                     </div>

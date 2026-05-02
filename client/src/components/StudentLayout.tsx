@@ -50,7 +50,9 @@ const StudentLayout = () => {
             {/* Mobile Header */}
             <div className="lg:hidden bg-surface border-b border-border p-4 flex items-center justify-between sticky top-0 z-30">
                 <div onClick={() => navigate('/student/dashboard')} className="flex items-center gap-2 cursor-pointer group">
-                    <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white font-bold group-hover:scale-110 transition-transform">S</div>
+                    <div className="w-8 h-8 overflow-hidden rounded-lg flex items-center justify-center bg-white group-hover:scale-110 transition-transform">
+                        <img src="/logo.png" alt="Logo" className="w-full h-full object-cover" />
+                    </div>
                     <span className="font-bold text-gray-900 group-hover:text-primary transition-colors">Smart HMS</span>
                 </div>
                 <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2 text-gray-600">
@@ -72,8 +74,8 @@ const StudentLayout = () => {
                             onClick={() => navigate('/student/dashboard')} 
                             className="h-16 flex items-center px-6 border-b border-border/50 cursor-pointer hover:bg-gray-50 transition-colors group"
                         >
-                            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white font-bold mr-3 shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform">
-                                S
+                            <div className="w-8 h-8 overflow-hidden rounded-lg flex items-center justify-center bg-white mr-3 shadow-lg group-hover:scale-110 transition-transform">
+                                <img src="/logo.png" alt="Logo" className="w-full h-full object-cover" />
                             </div>
                             <span className="font-bold text-gray-900 text-lg tracking-tight group-hover:text-primary transition-colors">Smart HMS</span>
                         </div>

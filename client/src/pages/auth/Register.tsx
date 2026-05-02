@@ -192,8 +192,8 @@ const Register = () => {
                         transition={{ duration: 0.5 }}
                         className="flex items-center gap-3"
                     >
-                        <div className="w-12 h-12 bg-white/10 backdrop-blur-xl rounded-2xl flex items-center justify-center border border-white/20 shadow-2xl shadow-indigo-500/20">
-                            <Shield size={24} className="text-indigo-400" />
+                        <div className="w-12 h-12 overflow-hidden rounded-2xl flex items-center justify-center border border-white/20 shadow-2xl bg-white">
+                            <img src="/logo.png" alt="SHAMS Logo" className="w-full h-full object-cover" />
                         </div>
                         <div>
                             <span className="font-bold text-white text-2xl tracking-tight">SHAMS</span>
@@ -317,8 +317,8 @@ const Register = () => {
                         {/* Mobile Header */}
                         <div className="lg:hidden mb-5">
                             <div className="flex items-center gap-3 mb-4">
-                                <div className="w-10 h-10 bg-gradient-to-br from-indigo-600 to-indigo-700 rounded-xl flex items-center justify-center shadow-lg">
-                                    <Shield size={20} className="text-white" />
+                                <div className="w-10 h-10 overflow-hidden rounded-xl flex items-center justify-center shadow-lg bg-white">
+                                    <img src="/logo.png" alt="SHAMS Logo" className="w-full h-full object-cover" />
                                 </div>
                                 <div>
                                     <span className="font-bold text-gray-900 text-lg tracking-tight">SHAMS</span>

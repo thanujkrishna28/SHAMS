@@ -98,8 +98,10 @@ const SecurityScanner = () => {
         <div className="max-w-4xl mx-auto space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                        <Shield className="text-primary" />
+                    <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
+                        <div className="w-8 h-8 overflow-hidden rounded-lg bg-white shadow-sm">
+                            <img src="/logo.png" alt="SHAMS Logo" className="w-full h-full object-cover" />
+                        </div>
                         Gate Security Terminal
                     </h1>
                     <p className="text-gray-500">Scanning at: <span className="font-medium text-gray-700">Main Gate</span></p>
@@ -118,8 +120,8 @@ const SecurityScanner = () => {
 
                         {!isScanning && (
                             <div className="flex-1 flex flex-col items-center justify-center text-center p-8 space-y-6">
-                                <div className="w-20 h-20 bg-indigo-50 text-indigo-500 rounded-full flex items-center justify-center">
-                                    <Shield size={40} />
+                                <div className="w-20 h-20 overflow-hidden rounded-3xl flex items-center justify-center bg-white shadow-xl">
+                                    <img src="/logo.png" alt="SHAMS Logo" className="w-full h-full object-cover" />
                                 </div>
                                 <div className="max-w-xs">
                                     <h3 className="font-bold text-gray-900 text-lg">Camera Ready</h3>
