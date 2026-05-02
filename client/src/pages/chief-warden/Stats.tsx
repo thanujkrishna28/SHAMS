@@ -149,19 +149,50 @@ const Stats = () => {
                         </div>
                     </div>
 
-                    <div className="relative">
+                    <div className="relative w-full md:w-auto">
                         <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                         <input
                             type="text"
                             placeholder="Search by name or ID..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm w-64 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm w-full md:w-64 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                     </div>
                 </div>
 
-                <div className="overflow-x-auto">
+                {/* Mobile Card View */}
+                <div className="md:hidden divide-y divide-gray-100">
+                    {filteredAbsentees?.length === 0 ? (
+                        <div className="px-4 py-12 text-center">
+                            <UserCheck size={32} className="text-green-500 mx-auto mb-3" />
+                            <p className="text-sm font-medium text-gray-900">All students present</p>
+                            <p className="text-xs text-gray-500">100% attendance today</p>
+                        </div>
+                    ) : (
+                        filteredAbsentees?.map((student) => (
+                            <div key={student._id} className="p-4 flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden">
+                                        {student.profileImage ? (
+                                            <img src={getImageUrl(student.profileImage)} alt={student.name} className="w-full h-full object-cover" />
+                                        ) : (
+                                            <span className="text-gray-500 font-semibold text-sm">{student.name.charAt(0)}</span>
+                                        )}
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-medium text-gray-900">{student.name}</p>
+                                        <p className="text-xs text-gray-500">{student.studentId} · Room {student.roomNumber}</p>
+                                    </div>
+                                </div>
+                                <span className="inline-flex px-2 py-1 text-xs font-medium rounded bg-red-100 text-red-700">Absent</span>
+                            </div>
+                        ))
+                    )}
+                </div>
+
+                {/* Desktop Table View */}
+                <div className="hidden md:block overflow-x-auto">
                     <table className="w-full">
                         <thead className="bg-gray-50 border-b border-gray-200">
                             <tr>
@@ -187,11 +218,7 @@ const Stats = () => {
                                             <div className="flex items-center gap-3">
                                                 <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden">
                                                     {student.profileImage ? (
-                                                        <img
-                                                            src={getImageUrl(student.profileImage)}
-                                                            alt={student.name}
-                                                            className="w-full h-full object-cover"
-                                                        />
+                                                        <img src={getImageUrl(student.profileImage)} alt={student.name} className="w-full h-full object-cover" />
                                                     ) : (
                                                         <span className="text-gray-500 font-semibold">{student.name.charAt(0)}</span>
                                                     )}
@@ -209,14 +236,10 @@ const Stats = () => {
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 text-center">
-                                            <span className="inline-flex px-2 py-1 text-xs font-medium rounded bg-red-100 text-red-700">
-                                                Absent
-                                            </span>
+                                            <span className="inline-flex px-2 py-1 text-xs font-medium rounded bg-red-100 text-red-700">Absent</span>
                                         </td>
                                         <td className="px-6 py-4 text-right">
-                                            <button className="px-3 py-1.5 text-sm text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
-                                                Notify
-                                            </button>
+                                            <button className="px-3 py-1.5 text-sm text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">Notify</button>
                                         </td>
                                     </tr>
                                 ))

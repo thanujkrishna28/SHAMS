@@ -102,7 +102,7 @@ const StudentDashboard = () => {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
-            <div className="max-w-7xl mx-auto px-6 py-8">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 py-4 sm:py-8">
                 {/* Header Section */}
                 <div className="mb-8">
                     <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
@@ -112,7 +112,7 @@ const StudentDashboard = () => {
                                 <span className="text-gray-300">|</span>
                                 <span>Academic Year 2024-25</span>
                             </div>
-                            <h1 className="text-3xl font-light text-gray-900 tracking-tight">
+                            <h1 className="text-2xl sm:text-3xl font-light text-gray-900 tracking-tight">
                                 Welcome back,{' '}
                                 <span className="font-semibold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
                                     {user?.name?.split(' ')[0] || 'Student'}
@@ -140,7 +140,7 @@ const StudentDashboard = () => {
                 <RequestChangeModal isOpen={isRequestModalOpen} onClose={() => setIsRequestModalOpen(false)} />
 
                 {/* Stats Grid - Enterprise Style */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5 mb-6 sm:mb-8">
                     {stats.map((item, i) => (
                         <motion.div
                             key={i}
@@ -280,7 +280,7 @@ const StudentDashboard = () => {
                 </div>
 
                 {/* Main Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
                     {/* Left Column - Room & Announcements */}
                     <div className="lg:col-span-2 space-y-6">
                         {/* Room Details - Professional Card */}

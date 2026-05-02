@@ -111,7 +111,7 @@ const Attendance = () => {
     return (
         <div className="space-y-10 animate-in fade-in duration-700">
             {/* Enterprise Command Header */}
-            <div className="relative overflow-hidden bg-slate-900 rounded-[2.5rem] shadow-2xl border border-slate-800 p-10 lg:p-12">
+            <div className="relative overflow-hidden bg-slate-900 rounded-2xl sm:rounded-[2.5rem] shadow-2xl border border-slate-800 p-5 sm:p-10 lg:p-12">
                 <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-indigo-500/10 rounded-full blur-[100px]" />
                 <div className="absolute -bottom-20 -left-20 w-[300px] h-[300px] bg-emerald-500/10 rounded-full blur-[80px]" />
 
@@ -126,7 +126,7 @@ const Attendance = () => {
                                 <span className="text-[10px] font-black text-emerald-400 uppercase tracking-[0.25em]">Live Verification Round</span>
                             </div>
                         </div>
-                        <h1 className="text-5xl lg:text-6xl font-black text-white tracking-tighter leading-none mb-4">Attendance Round</h1>
+                        <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-white tracking-tighter leading-none mb-4">Attendance Round</h1>
                         <p className="text-slate-400 text-lg font-medium leading-relaxed">
                             Physical identification and residential verification engine. Process units in sequence for optimal integrity.
                         </p>
@@ -160,9 +160,9 @@ const Attendance = () => {
 
             {/* Registry Control Deck */}
             <div className="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden">
-                <div className="px-10 py-6 border-b border-slate-100 bg-slate-50/30 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <div className="px-4 sm:px-10 py-4 sm:py-6 border-b border-slate-100 bg-slate-50/30 flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.25em]">Residential Sector Matrix</h3>
-                    <div className="relative group min-w-[320px]">
+                    <div className="relative group w-full md:min-w-[320px]">
                         <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors" size={20} />
                         <input
                             type="text"
@@ -174,7 +174,7 @@ const Attendance = () => {
                     </div>
                 </div>
 
-                <div className="p-10">
+                <div className="p-4 sm:p-10">
                     {filteredRooms?.length === 0 ? (
                         <div className="py-24 text-center">
                             <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6 border-4 border-dashed border-slate-100">
@@ -221,8 +221,8 @@ const Attendance = () => {
             {/* Attendance Verification Modal */}
             {selectedRoom && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-950/40 backdrop-blur-[12px] animate-in fade-in duration-300">
-                    <div className="bg-white rounded-[3rem] w-full max-w-xl shadow-2xl overflow-hidden border border-slate-200 animate-in zoom-in-95 duration-300">
-                        <div className="px-10 py-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/80">
+                    <div className="bg-white rounded-2xl sm:rounded-[3rem] w-full max-w-xl mx-2 sm:mx-0 shadow-2xl overflow-hidden border border-slate-200 animate-in zoom-in-95 duration-300">
+                        <div className="px-5 sm:px-10 py-5 sm:py-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/80">
                             <div>
                                 <h2 className="text-[12px] font-black text-slate-900 uppercase tracking-[0.25em]">Unit Verification</h2>
                                 <p className="text-[10px] text-indigo-500 font-black uppercase tracking-widest leading-none mt-1">Scanning Room {selectedRoom.roomNumber}</p>
@@ -232,7 +232,7 @@ const Attendance = () => {
                             </button>
                         </div>
 
-                        <div className="p-10 space-y-4 max-h-[50vh] overflow-y-auto custom-scrollbar">
+                        <div className="p-5 sm:p-10 space-y-4 max-h-[50vh] overflow-y-auto custom-scrollbar">
                             {selectedRoom.occupants.map((student) => {
                                 const status = attendanceData[student._id];
                                 return (
@@ -277,7 +277,7 @@ const Attendance = () => {
                             })}
                         </div>
 
-                        <div className="p-10 border-t border-slate-100 bg-slate-50/50">
+                        <div className="p-5 sm:p-10 border-t border-slate-100 bg-slate-50/50">
                             <button
                                 onClick={handleSubmit}
                                 disabled={mutation.isPending || Object.keys(attendanceData).length !== selectedRoom.occupants.length}
@@ -294,7 +294,7 @@ const Attendance = () => {
             {/* System Broadcast Modal */}
             {isAnnouncementOpen && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-950/40 backdrop-blur-[12px] animate-in fade-in duration-300">
-                    <div className="bg-white rounded-[3rem] w-full max-w-xl shadow-2xl overflow-hidden border border-slate-200 animate-in zoom-in-95 duration-300">
+                    <div className="bg-white rounded-2xl sm:rounded-[3rem] w-full max-w-xl mx-2 sm:mx-0 shadow-2xl overflow-hidden border border-slate-200 animate-in zoom-in-95 duration-300">
                         <div className="px-10 py-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/80">
                             <div className="flex items-center gap-4">
                                 <div className="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-100">
@@ -309,7 +309,7 @@ const Attendance = () => {
                                 <X size={20} />
                             </button>
                         </div>
-                        <form onSubmit={handleBroadcast} className="p-12 space-y-8">
+                        <form onSubmit={handleBroadcast} className="p-5 sm:p-12 space-y-6 sm:space-y-8">
                             <div className="space-y-4">
                                 <label className="block text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] ml-2">Broadcast Priority</label>
                                 <div className="grid grid-cols-2 gap-4">

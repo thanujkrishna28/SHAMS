@@ -141,9 +141,52 @@ const Allocations = () => {
                 </div>
             </div>
 
-            {/* Allocations Table */}
+            {/* Allocations — Card on mobile, Table on desktop */}
             <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-                <div className="overflow-x-auto">
+
+                {/* Mobile Card View */}
+                <div className="md:hidden divide-y divide-gray-100">
+                    {filteredAllocations?.length === 0 ? (
+                        <div className="px-4 py-12 text-center">
+                            <LayoutDashboard size={32} className="text-gray-300 mx-auto mb-3" />
+                            <p className="text-sm text-gray-500">No allocation records found</p>
+                        </div>
+                    ) : (
+                        filteredAllocations?.map((alloc: any) => (
+                            <div key={alloc._id} className="p-4 space-y-3">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center text-gray-600 font-semibold text-sm">
+                                            {alloc.student?.name?.[0] || '?'}
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-medium text-gray-900">{alloc.student?.name || 'Unknown'}</p>
+                                            <p className="text-xs text-gray-500">#{alloc.student?.profile?.studentId || 'N/A'}</p>
+                                        </div>
+                                    </div>
+                                    <StatusBadge status={alloc.status} />
+                                </div>
+                                <div className="flex items-center gap-3 text-xs text-gray-500">
+                                    <Building2 size={12} />
+                                    <span>{alloc.hostel?.name || 'N/A'} • {alloc.block?.name || 'N/A'} • Room {alloc.room?.roomNumber || '?'}</span>
+                                </div>
+                                {alloc.status === 'pending' && (
+                                    <div className="flex gap-2 pt-1">
+                                        <button onClick={() => handleUpdateStatus(alloc._id, 'rejected')} className="flex-1 py-2 text-sm text-red-600 bg-red-50 rounded-lg font-medium flex items-center justify-center gap-1">
+                                            <XCircle size={14} /> Reject
+                                        </button>
+                                        <button onClick={() => handleUpdateStatus(alloc._id, 'approved')} className="flex-1 py-2 text-sm text-green-700 bg-green-50 rounded-lg font-medium flex items-center justify-center gap-1">
+                                            <CheckCircle size={14} /> Approve
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        ))
+                    )}
+                </div>
+
+                {/* Desktop Table View */}
+                <div className="hidden md:block overflow-x-auto">
                     <table className="w-full">
                         <thead className="bg-gray-50 border-b border-gray-200">
                             <tr>
@@ -199,27 +242,15 @@ const Allocations = () => {
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4 text-center">
-                                            <StatusBadge status={alloc.status} />
-                                        </td>
+                                        <td className="px-6 py-4 text-center"><StatusBadge status={alloc.status} /></td>
                                         <td className="px-6 py-4 text-right">
                                             {alloc.status === 'pending' ? (
                                                 <div className="flex justify-end gap-2">
-                                                    <button
-                                                        onClick={() => handleUpdateStatus(alloc._id, 'rejected')}
-                                                        className="px-3 py-1.5 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors flex items-center gap-1"
-                                                        title="Reject"
-                                                    >
-                                                        <XCircle size={14} />
-                                                        Reject
+                                                    <button onClick={() => handleUpdateStatus(alloc._id, 'rejected')} className="px-3 py-1.5 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors flex items-center gap-1">
+                                                        <XCircle size={14} /> Reject
                                                     </button>
-                                                    <button
-                                                        onClick={() => handleUpdateStatus(alloc._id, 'approved')}
-                                                        className="px-3 py-1.5 text-sm text-green-600 hover:bg-green-50 rounded-lg transition-colors flex items-center gap-1"
-                                                        title="Approve"
-                                                    >
-                                                        <CheckCircle size={14} />
-                                                        Approve
+                                                    <button onClick={() => handleUpdateStatus(alloc._id, 'approved')} className="px-3 py-1.5 text-sm text-green-600 hover:bg-green-50 rounded-lg transition-colors flex items-center gap-1">
+                                                        <CheckCircle size={14} /> Approve
                                                     </button>
                                                 </div>
                                             ) : (
@@ -236,7 +267,7 @@ const Allocations = () => {
                     </table>
                 </div>
 
-                <div className="px-6 py-3 bg-gray-50 border-t border-gray-200 text-xs text-gray-500">
+                <div className="px-4 sm:px-6 py-3 bg-gray-50 border-t border-gray-200 text-xs text-gray-500">
                     Total: {filteredAllocations?.length || 0} allocation records
                 </div>
             </div>

@@ -1,10 +1,9 @@
 import React from 'react';
-import { NavLink, useNavigate, Outlet } from 'react-router-dom';
+import { NavLink, useNavigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
 import {
     Shield,
     CheckCircle,
-    BarChart3,
     LogOut,
     Menu,
     X,
@@ -24,6 +23,7 @@ import {
 const WardenLayout = () => {
     const { user, logout } = useAuthStore();
     const navigate = useNavigate();
+    const location = useLocation();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
 
     const handleLogout = () => {
@@ -149,11 +149,57 @@ const WardenLayout = () => {
                 </div>
 
                 <main className="flex-1 overflow-y-auto bg-[#F8FAFC] custom-scrollbar selection:bg-indigo-100">
-                    <div className="p-6 md:p-8 lg:p-10 max-w-7xl mx-auto">
+                    <div className="p-4 md:p-6 lg:p-10 pb-24 lg:pb-10 max-w-7xl mx-auto">
                         <Outlet />
                     </div>
                 </main>
             </div>
+
+            {/* Mobile Bottom Navigation */}
+            {!isMobileMenuOpen && (
+                <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-slate-900 border-t border-slate-800 px-2 py-1 flex items-center justify-around z-40 shadow-2xl">
+                    {(user?.role === 'chief_warden'
+                        ? [
+                            { name: 'Home', path: '/chief-warden/stats', icon: LayoutDashboard },
+                            { name: 'Hostels', path: '/chief-warden/hostels', icon: Home },
+                            { name: 'Rooms', path: '/chief-warden/rooms', icon: BedDouble },
+                            { name: 'Alloc', path: '/chief-warden/allocations', icon: CheckCircle },
+                            { name: 'More', path: null, icon: Menu },
+                          ]
+                        : [
+                            { name: 'Dashboard', path: '/chief-warden/stats', icon: LayoutDashboard },
+                            { name: 'Attendance', path: '/warden/attendance', icon: CheckCircle },
+                            { name: 'Complaints', path: '/warden/complaints', icon: MessageSquare },
+                            { name: 'Visitors', path: '/warden/visitors', icon: UserCheck },
+                            { name: 'More', path: null, icon: Menu },
+                          ]
+                    ).map((item) =>
+                        item.path ? (
+                            <NavLink
+                                key={item.path}
+                                to={item.path}
+                                className={({ isActive }) =>
+                                    `flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-lg transition-all ${
+                                        isActive ? 'text-indigo-400' : 'text-slate-500'
+                                    }`
+                                }
+                            >
+                                <item.icon size={20} />
+                                <span className="text-[9px] font-bold uppercase tracking-tight">{item.name}</span>
+                            </NavLink>
+                        ) : (
+                            <button
+                                key="more"
+                                onClick={() => setIsMobileMenuOpen(true)}
+                                className="flex flex-col items-center gap-0.5 px-2 py-1.5 text-slate-500 rounded-lg"
+                            >
+                                <Menu size={20} />
+                                <span className="text-[9px] font-bold uppercase tracking-tight">More</span>
+                            </button>
+                        )
+                    )}
+                </div>
+            )}
 
             {/* Backdrop Logic */}
             {isMobileMenuOpen && (
