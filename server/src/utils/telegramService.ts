@@ -166,7 +166,36 @@ if (token) {
         }
     });
 
-    console.log('✅ Telegram Bot initialized with Magic Links');
+    // Handle /myid command
+    bot.onText(/\/myid/, async (msg: any) => {
+        const chatId = msg.chat.id;
+
+        const user = await User.findOne({ 'profile.telegramChatId': chatId.toString() });
+
+        if (user) {
+            const qrData = `shams:user:${user._id}`; // Data format expected by security scanners
+            const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${qrData}`;
+
+            const idCard = `🪪 *SHAMS DIGITAL ID*\n` +
+                `━━━━━━━━━━━━━━━\n` +
+                `👤 *Name:* ${user.name}\n` +
+                `🆔 *ID:* \`${user.profile?.studentId || 'N/A'}\`\n` +
+                `🎓 *Branch:* ${user.profile?.branch || 'N/A'}\n` +
+                `🏠 *Room:* ${user.profile?.roomNumber || 'N/A'}\n` +
+                `🏢 *Block:* ${user.profile?.block || 'N/A'}\n` +
+                `━━━━━━━━━━━━━━━\n` +
+                `*Status:* ${user.profile?.isInside ? '🟢 INSIDE' : '🔴 OUTSIDE'}`;
+
+            await bot?.sendPhoto(chatId, qrImageUrl, {
+                caption: idCard,
+                parse_mode: 'Markdown'
+            });
+        } else {
+            bot?.sendMessage(chatId, `🔐 *Access Denied*\n\nYou haven't linked your account yet. Use /complaint to verify your phone number first.`, { parse_mode: 'Markdown' });
+        }
+    });
+
+    console.log('✅ Telegram Bot initialized with Digital IDs');
 } else {
     console.warn('⚠️ Telegram Bot token missing in .env');
 }
