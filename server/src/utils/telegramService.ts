@@ -10,7 +10,7 @@ if (token) {
     bot = new TelegramBot(token, { polling: true });
 
     // Handle /start command to provide Chat ID
-    bot.onText(/\/start/, (msg) => {
+    bot.onText(/\/start/, (msg: TelegramBot.Message) => {
         const chatId = msg.chat.id;
         bot?.sendMessage(chatId, `🚀 Welcome to SHAMS Notification Bot!\n\nYour Chat ID is: \`${chatId}\`\n\nPlease provide this ID to your administrator to receive hostel alerts.`);
     });

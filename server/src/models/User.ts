@@ -50,8 +50,8 @@ export interface IUser extends Document {
             counter: number;
             deviceType: string;
             transports?: string[];
-            telegramChatId?: string;
         }>;
+        telegramChatId?: string;
     };
     isActive: boolean;
     createdAt: Date;
