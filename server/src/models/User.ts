@@ -113,7 +113,7 @@ const UserSchema: Schema = new Schema(
                 counter: Number,
                 deviceType: String,
                 transports: [String]
-            }]
+            }],
             telegramChatId: { type: String },
         },
         isActive: { type: Boolean, default: true },
