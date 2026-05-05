@@ -20,12 +20,9 @@ initSocket(httpServer);
 // Start Background Jobs
 startEscalationCron();
 
-// For Vercel/Production, we export the app
-// The listen() call is only for local dev
-if (process.env.NODE_ENV !== 'production') {
-    httpServer.listen(PORT, () => {
-        console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
-    });
-}
+// Start the server
+httpServer.listen(PORT, () => {
+    console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
+});
 
 export default app;
