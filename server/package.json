@@ -46,6 +46,7 @@
         "morgan": "^1.10.1",
         "multer": "^1.4.5-lts.1",
         "multer-storage-cloudinary": "^4.0.0",
+        "node-telegram-bot-api": "^0.67.0",
         "nodemailer": "^8.0.1",
         "otplib": "^13.4.0",
         "passport": "^0.7.0",
@@ -59,6 +60,7 @@
         "zod": "^3.25.76"
     },
     "devDependencies": {
+        "@types/node-telegram-bot-api": "^0.64.14",
         "nodemon": "^3.0.2",
         "ts-node": "^10.9.2"
     }

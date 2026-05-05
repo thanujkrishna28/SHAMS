@@ -8,6 +8,7 @@ import mongoSanitize from 'express-mongo-sanitize';
 import hpp from 'hpp';
 import passport from 'passport';
 import { configurePassport } from './config/passport';
+import './utils/telegramService'; // Initialize Telegram Bot
 
 // Import Routes
 import authRoutes from './routes/authRoutes';

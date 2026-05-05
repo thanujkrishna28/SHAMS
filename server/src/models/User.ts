@@ -50,6 +50,7 @@ export interface IUser extends Document {
             counter: number;
             deviceType: string;
             transports?: string[];
+            telegramChatId?: string;
         }>;
     };
     isActive: boolean;
@@ -113,6 +114,7 @@ const UserSchema: Schema = new Schema(
                 deviceType: String,
                 transports: [String]
             }]
+            telegramChatId: { type: String },
         },
         isActive: { type: Boolean, default: true },
     },

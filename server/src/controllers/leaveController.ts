@@ -3,6 +3,8 @@ import asyncHandler from 'express-async-handler';
 import Leave from '../models/Leave';
 import { createNotification, notifyAdmins } from './notificationController';
 import { logAudit } from '../utils/auditLogger';
+import { sendTelegramNotification } from '../utils/telegramService';
+import User from '../models/User';
 
 // @desc    Apply for leave
 // @route   POST /api/leaves
@@ -24,6 +26,18 @@ export const applyLeave = asyncHandler(async (req: any, res: Response) => {
         `Student ${req.user.name} applied for leave from ${new Date(startDate).toLocaleDateString()} to ${new Date(endDate).toLocaleDateString()}`,
         'info'
     );
+
+    // 🚀 Telegram notification for Staff
+    if (process.env.TELEGRAM_CHAT_ID) {
+        const telegramMessage = `🏠 *New Leave Request*\n\n` +
+            `*Student:* ${req.user.name}\n` +
+            `*Dates:* ${new Date(startDate).toLocaleDateString()} to ${new Date(endDate).toLocaleDateString()}\n` +
+            `*Reason:* ${reason}\n` +
+            `*Type:* ${type}\n\n` +
+            `[Manage Leaves](${process.env.FRONTEND_URL}/admin/leaves)`;
+        
+        await sendTelegramNotification(process.env.TELEGRAM_CHAT_ID, telegramMessage);
+    }
 
     res.status(201).json(leave);
 });
@@ -85,6 +99,16 @@ export const updateLeaveStatus = asyncHandler(async (req: Request, res: Response
             `Your leave request from ${new Date(leave.startDate).toLocaleDateString()} to ${new Date(leave.endDate).toLocaleDateString()} has been ${status}. ${adminComment ? `Comment: ${adminComment}` : ''}`,
             status === 'approved' ? 'success' : 'warning'
         );
+
+        // 🚀 Telegram notification for Student
+        const student = await User.findById(leave.student);
+        if (student?.profile?.telegramChatId) {
+            const studentMsg = `🏠 *Leave Status Update*\n\n` +
+                `Your leave from *${new Date(leave.startDate).toLocaleDateString()}* to *${new Date(leave.endDate).toLocaleDateString()}* has been *${status.toUpperCase()}*.\n\n` +
+                `${adminComment ? `*Staff Comment:* _${adminComment}_` : ''}`;
+            
+            await sendTelegramNotification(student.profile.telegramChatId, studentMsg);
+        }
 
         // Audit Log
         try {

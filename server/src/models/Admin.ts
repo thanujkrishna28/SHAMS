@@ -14,6 +14,7 @@ export interface IAdmin extends Document {
         profileImage?: string;
         mfaSecret?: string;
         isMFAEnabled?: boolean;
+        telegramChatId?: string;
     };
     isActive: boolean;
     createdAt: Date;
@@ -38,7 +39,8 @@ const AdminSchema: Schema = new Schema(
             phone: String,
             profileImage: String,
             mfaSecret: { type: String, select: false },
-            isMFAEnabled: { type: Boolean, default: false }
+            isMFAEnabled: { type: Boolean, default: false },
+            telegramChatId: { type: String }
         },
         isActive: { type: Boolean, default: true },
     },

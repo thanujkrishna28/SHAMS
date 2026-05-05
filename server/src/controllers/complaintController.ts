@@ -6,6 +6,7 @@ import { logAudit } from '../utils/auditLogger';
 import { analyzeComplaint } from '../utils/aiService';
 import { sendSmartNotificationEmail } from '../utils/mailService';
 import User from '../models/User';
+import { sendTelegramNotification } from '../utils/telegramService';
 
 // @desc    Create a new complaint
 // @route   POST /api/complaints
@@ -47,11 +48,25 @@ export const createComplaint = asyncHandler(async (req: any, res: Response) => {
         status: 'pending'
     });
 
+    // 🔔 Notify Admins/Staff via Dashboard
     await notifyAdmins(
         'New Complaint Received',
         `Student ${req.user.name} submitted a new complaint: ${title}`,
         'warning'
     );
+
+    // 🚀 Notify via Telegram (if configured)
+    if (process.env.TELEGRAM_CHAT_ID) {
+        const telegramMessage = `🛠 *New Complaint Received*\n\n` +
+            `*Title:* ${title}\n` +
+            `*Category:* ${finalCategory}\n` +
+            `*Priority:* ${finalPriority === 'high' ? '🔴 HIGH' : finalPriority === 'medium' ? '🟡 MEDIUM' : '🟢 LOW'}\n` +
+            `*Student:* ${req.user.name}\n\n` +
+            `_Due Date:_ ${dueDate.toLocaleString()}\n` +
+            `[View on Dashboard](${process.env.FRONTEND_URL}/admin/complaints)`;
+        
+        await sendTelegramNotification(process.env.TELEGRAM_CHAT_ID, telegramMessage);
+    }
 
     // Email notification to student
     try {
@@ -140,7 +155,16 @@ export const updateComplaintStatus = asyncHandler(async (req: Request, res: Resp
                     `Complaint ${status.charAt(0).toUpperCase() + status.slice(1)}`,
                     `Your complaint "${complaint.title}" has been ${status}. ${adminComment ? `Staff Comment: ${adminComment}` : ''}`
                 );
-            } catch (err) { console.error("Email failed", err) }
+
+                // 🚀 Telegram notification for student
+                if (student.profile?.telegramChatId) {
+                    const studentMsg = `🛠 *Complaint Update*\n\n` +
+                        `Your complaint "*${complaint.title}*" has been marked as *${status.toUpperCase()}*.\n\n` +
+                        `${adminComment ? `*Staff Comment:* _${adminComment}_` : ''}`;
+                    
+                    await sendTelegramNotification(student.profile.telegramChatId, studentMsg);
+                }
+            } catch (err) { console.error("Notification failed", err) }
         }
 
         // Audit Log

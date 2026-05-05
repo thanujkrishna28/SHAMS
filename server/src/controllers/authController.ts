@@ -743,3 +743,35 @@ export const initiateSSO = asyncHandler(async (req: Request, res: Response) => {
         message: 'MFA Verification required'
     });
 });
+
+// @desc    Link Telegram Chat ID
+// @route   POST /api/auth/telegram/link
+// @access  Private
+export const linkTelegram = asyncHandler(async (req: any, res: Response) => {
+    const { chatId } = req.body;
+    const userId = req.user._id;
+    const role = req.user.role;
+    let user: any;
+
+    if (!chatId) {
+        res.status(400);
+        throw new Error('Telegram Chat ID is required');
+    }
+
+    if (role === 'admin' || role === 'chief_warden') {
+        user = await Admin.findById(userId);
+    } else if (role === 'warden') {
+        user = await Warden.findById(userId);
+    } else {
+        user = await User.findById(userId);
+    }
+
+    if (user && user.profile) {
+        user.profile.telegramChatId = chatId;
+        await user.save();
+        res.json({ status: 'success', message: 'Telegram linked successfully' });
+    } else {
+        res.status(404);
+        throw new Error('User not found');
+    }
+});

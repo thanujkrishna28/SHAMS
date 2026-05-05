@@ -2,7 +2,7 @@ import express from 'express';
 import { 
     registerUser, loginUser, getUserProfile, updateUserProfile, 
     updateMealPreference, requestOTP, resetPassword,
-    generateMFA, enableMFA, disableMFA, verifyMFALogin, initiateSSO
+    generateMFA, enableMFA, disableMFA, verifyMFALogin, initiateSSO, linkTelegram
 } from '../controllers/authController';
 import { protect } from '../middleware/authMiddleware';
 import passport from 'passport';
@@ -24,6 +24,7 @@ router.post('/mfa/enable', protect, enableMFA);
 router.post('/mfa/disable', protect, disableMFA);
 router.post('/mfa/verify', verifyMFALogin);
 router.post('/mfa/initiate-sso', initiateSSO);
+router.post('/telegram/link', protect, linkTelegram);
 
 // Google OAuth Routes
 router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));

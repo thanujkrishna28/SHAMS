@@ -21,6 +21,7 @@ export interface IWarden extends Document {
             deviceType: string;
             transports?: string[];
         }>;
+        telegramChatId?: string;
     };
     isActive: boolean;
     createdAt: Date;
@@ -52,7 +53,8 @@ const WardenSchema: Schema = new Schema(
                 counter: Number,
                 deviceType: String,
                 transports: [String]
-            }]
+            }],
+            telegramChatId: { type: String }
         },
         isActive: { type: Boolean, default: true },
     },
