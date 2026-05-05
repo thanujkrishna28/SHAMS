@@ -4,13 +4,13 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const token = process.env.TELEGRAM_BOT_TOKEN;
-let bot: TelegramBot | null = null;
+let bot: any = null;
 
 if (token) {
     bot = new TelegramBot(token, { polling: true });
 
     // Handle /start command to provide Chat ID
-    bot.onText(/\/start/, (msg: TelegramBot.Message) => {
+    bot.onText(/\/start/, (msg: any) => {
         const chatId = msg.chat.id;
         bot?.sendMessage(chatId, `🚀 Welcome to SHAMS Notification Bot!\n\nYour Chat ID is: \`${chatId}\`\n\nPlease provide this ID to your administrator to receive hostel alerts.`);
     });
