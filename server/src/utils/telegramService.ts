@@ -170,16 +170,20 @@ if (token) {
     bot.onText(/\/myid/, async (msg: any) => {
         const chatId = msg.chat.id;
 
-        const user = await User.findOne({ 'profile.telegramChatId': chatId.toString() });
+        // Search across all collections
+        const user = await User.findOne({ 'profile.telegramChatId': chatId.toString() }) ||
+                     await Warden.findOne({ 'profile.telegramChatId': chatId.toString() }) ||
+                     await Admin.findOne({ 'profile.telegramChatId': chatId.toString() });
 
         if (user) {
-            const qrData = `shams:user:${user._id}`; // Data format expected by security scanners
+            const qrData = `shams:${user.role || 'user'}:${user._id}`;
             const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${qrData}`;
 
-            const idCard = `🪪 *SHAMS DIGITAL ID*\n` +
+            const roleTitle = user.role?.toUpperCase() || 'STUDENT';
+            const idCard = `🪪 *SHAMS DIGITAL ID (${roleTitle})*\n` +
                 `━━━━━━━━━━━━━━━\n` +
                 `👤 *Name:* ${user.name}\n` +
-                `🆔 *ID:* \`${user.profile?.studentId || 'N/A'}\`\n` +
+                `🆔 *ID:* \`${user.profile?.studentId || user.email}\`\n` +
                 `🎓 *Branch:* ${user.profile?.branch || 'N/A'}\n` +
                 `🏠 *Room:* ${user.profile?.roomNumber || 'N/A'}\n` +
                 `🏢 *Block:* ${user.profile?.block || 'N/A'}\n` +
@@ -195,7 +199,7 @@ if (token) {
         }
     });
 
-    console.log('✅ Telegram Bot initialized with Digital IDs');
+    console.log('✅ Telegram Bot initialized with Digital IDs for all roles');
 } else {
     console.warn('⚠️ Telegram Bot token missing in .env');
 }
