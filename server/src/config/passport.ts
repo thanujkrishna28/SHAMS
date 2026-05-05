@@ -18,7 +18,7 @@ export const configurePassport = () => {
 
                 try {
                     // 1. Search in all collections for existing googleId
-                    let user = await User.findOne({ googleId: id }) || 
+                    let user: any = await User.findOne({ googleId: id }) || 
                                await Admin.findOne({ googleId: id }) || 
                                await Warden.findOne({ googleId: id });
                     
