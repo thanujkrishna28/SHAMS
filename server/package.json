@@ -26,6 +26,7 @@
         "@types/node": "^20.10.5",
         "@types/nodemailer": "^7.0.10",
         "@types/pdfkit": "^0.17.5",
+        "@types/qrcode": "^1.5.6",
         "@types/socket.io": "^3.0.2",
         "@types/uuid": "^9.0.0",
         "bcryptjs": "^2.4.3",
@@ -54,7 +55,6 @@
         "zod": "^3.25.76"
     },
     "devDependencies": {
-        "@types/qrcode": "^1.5.6",
         "nodemon": "^3.0.2",
         "ts-node": "^10.9.2"
     }
