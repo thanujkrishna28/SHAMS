@@ -124,9 +124,51 @@ const Login = () => {
     const [mfaCode, setMfaCode] = useState('');
     const [mfaDetails, setMfaDetails] = useState<{ userId: string; role: string } | null>(null);
 
-    const { login, logout, isLoading, verifyMFA, startWebAuthnLogin } = useAuthStore();
+    const { login, logout, isLoading, verifyMFA, startWebAuthnLogin, loginWithToken } = useAuthStore();
     const navigate = useNavigate();
     const typingText = useTypingAnimation(['Secure Access', 'Fast Login', 'Smart Dashboard'], 100, 50, 2000);
+
+    useEffect(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get('token');
+        const error = urlParams.get('error');
+
+        if (token) {
+            handleOAuthLogin(token);
+        }
+
+        if (error) {
+            toast.error('Google authentication failed. Please try again.');
+        }
+    }, []);
+
+    const handleOAuthLogin = async (token: string) => {
+        try {
+            await loginWithToken(token);
+            const user = useAuthStore.getState().user;
+            
+            toast.success(`Welcome back, ${user?.name}!`);
+            setIsSuccess(true);
+            
+            setTimeout(() => {
+                // Correct role-based redirection
+                if (user?.role === 'security') {
+                    navigate('/security/scanner');
+                } else if (user?.role === 'admin' || user?.role === 'warden' || user?.role === 'chief_warden') {
+                    navigate('/admin/dashboard');
+                } else {
+                    navigate('/student/dashboard');
+                }
+            }, 1500);
+        } catch (error) {
+            toast.error('Session initialization failed');
+        }
+    };
+
+    const handleGoogleLogin = () => {
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+        window.location.href = `${apiUrl}/auth/google`;
+    };
 
     const handleBiometricLogin = async () => {
         setIsScanning(true);
@@ -490,6 +532,7 @@ const Login = () => {
                                             <motion.button
                                                 whileHover={{ scale: 1.02 }}
                                                 whileTap={{ scale: 0.98 }}
+                                                onClick={handleGoogleLogin}
                                                 type="button"
                                                 className="flex items-center justify-center gap-2 py-2 border border-gray-200 rounded-lg transition-all hover:bg-gray-50"
                                             >

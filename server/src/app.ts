@@ -6,6 +6,8 @@ import morgan from 'morgan';
 import { rateLimit } from 'express-rate-limit';
 import mongoSanitize from 'express-mongo-sanitize';
 import hpp from 'hpp';
+import passport from 'passport';
+import { configurePassport } from './config/passport';
 
 // Import Routes
 import authRoutes from './routes/authRoutes';
@@ -96,6 +98,10 @@ app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 
 // Logging
 app.use(morgan('dev'));
+
+// Passport
+configurePassport();
+app.use(passport.initialize());
 
 // Global Rate Limiting
 const limiter = rateLimit({

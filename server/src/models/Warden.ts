@@ -5,6 +5,7 @@ export interface IWarden extends Document {
     name: string;
     email: string;
     password?: string;
+    googleId?: string;
     role: 'warden';
     profile?: {
         hostel?: mongoose.Types.ObjectId;
@@ -31,7 +32,8 @@ const WardenSchema: Schema = new Schema(
     {
         name: { type: String, required: true },
         email: { type: String, required: true, unique: true },
-        password: { type: String, required: true },
+        password: { type: String, required: false },
+        googleId: { type: String, unique: true, sparse: true },
         role: {
             type: String,
             enum: ['warden'],

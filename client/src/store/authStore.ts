@@ -55,6 +55,7 @@ interface AuthState {
     setMockAuth: (user: any) => void;
     startWebAuthnRegistration: () => Promise<void>;
     startWebAuthnLogin: () => Promise<void>;
+    loginWithToken: (token: string) => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -214,6 +215,23 @@ export const useAuthStore = create<AuthState>((set) => ({
                 throw new Error('Authentication verification failed');
             }
         } catch (error: any) {
+            set({ isLoading: false });
+            throw error;
+        }
+    },
+
+    loginWithToken: async (token: string) => {
+        try {
+            set({ isLoading: true });
+            localStorage.setItem('user', JSON.stringify({ token })); // Temporary store to allow fetchProfile to work
+            
+            const { data } = await api.get('/auth/profile');
+            const userWithToken = { ...data, token };
+            
+            localStorage.setItem('user', JSON.stringify(userWithToken));
+            set({ user: userWithToken, isAuthenticated: true, isLoading: false });
+        } catch (error) {
+            localStorage.removeItem('user');
             set({ isLoading: false });
             throw error;
         }

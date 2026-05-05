@@ -5,7 +5,8 @@ export interface IUser extends Document {
     name: string;
     email: string;
     password?: string;
-    role: 'student' | 'guardian';
+    googleId?: string;
+    role: 'student' | 'guardian' | 'security';
     profile?: {
         studentId?: string;
         gender?: 'Male' | 'Female';
@@ -61,10 +62,11 @@ const UserSchema: Schema = new Schema(
     {
         name: { type: String, required: true },
         email: { type: String, required: true, unique: true },
-        password: { type: String, required: true },
+        password: { type: String, required: false },
+        googleId: { type: String, unique: true, sparse: true },
         role: {
             type: String,
-            enum: ['student', 'guardian'],
+            enum: ['student', 'guardian', 'security'],
             default: 'student',
         },
         profile: {
