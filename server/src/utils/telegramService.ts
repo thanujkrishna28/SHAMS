@@ -45,13 +45,22 @@ if (token) {
             const token = generateToken(user._id.toString());
             const magicLink = `${process.env.FRONTEND_URL || 'https://shams-green.vercel.app'}/login?token=${token}`;
 
-            bot?.sendMessage(chatId, `✅ *Identity Verified!*\n\nWelcome back, *${user.name}*. Your Telegram is now linked to SHAMS.\n\nYou can now use /complaint or /leave to log in instantly.`, {
+            const welcomeMsg = `🎊 *Welcome to the SHAMS Family, ${user.name}!* 🎊\n\n` +
+                `We are excited to have you with us. Your account is now fully linked to Telegram.\n\n` +
+                `🏠 *Your Details:*\n` +
+                `• *ID:* \`${user.profile?.studentId || 'N/A'}\`\n` +
+                `• *Hostel:* ${user.profile?.hostel ? 'Assigned' : 'Pending'}\n` +
+                `• *Room:* ${user.profile?.roomNumber || 'Not Allocated Yet'}\n\n` +
+                `🚀 *Instant Actions:*\n` +
+                `You can now use the menu below to file complaints, apply for leaves, or check your dashboard without ever logging in again!`;
+
+            bot?.sendMessage(chatId, welcomeMsg, {
                 parse_mode: 'Markdown',
                 reply_markup: {
-                    inline_keyboard: [[
-                        { text: '🚀 Go to Dashboard', url: magicLink }
-                    ]],
-                    remove_keyboard: true // Hide the share contact keyboard
+                    inline_keyboard: [
+                        [{ text: '🖥 Open Dashboard', url: magicLink }],
+                        [{ text: '📝 File a Complaint', url: `${magicLink}&redirect=/student/complaints` }]
+                    ]
                 }
             });
         } else {
