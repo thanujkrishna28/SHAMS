@@ -42,7 +42,7 @@ if (token) {
                 await user.save();
             }
 
-            const token = generateToken(user._id as string);
+            const token = generateToken(user._id.toString());
             const magicLink = `${process.env.FRONTEND_URL || 'https://shams-green.vercel.app'}/login?token=${token}`;
 
             bot?.sendMessage(chatId, `✅ *Identity Verified!*\n\nWelcome back, *${user.name}*. Your Telegram is now linked to SHAMS.\n\nYou can now use /complaint or /leave to log in instantly.`, {
@@ -68,7 +68,7 @@ if (token) {
                      await Admin.findOne({ 'profile.telegramChatId': chatId.toString() });
 
         if (user) {
-            const token = generateToken(user._id as string);
+            const token = generateToken(user._id.toString());
             const magicLink = `${process.env.FRONTEND_URL || 'https://shams-green.vercel.app'}/login?token=${token}`;
             
             bot?.sendMessage(chatId, `🖥 *SHAMS Dashboard*\n\nWelcome back, *${user.name}*. Access your account instantly:`, {
@@ -100,7 +100,7 @@ if (token) {
                      await Admin.findOne({ 'profile.telegramChatId': chatId.toString() });
 
         if (user) {
-            const token = generateToken(user._id as string);
+            const token = generateToken(user._id.toString());
             const magicLink = `${process.env.FRONTEND_URL || 'https://shams-green.vercel.app'}/login?token=${token}&redirect=/student/complaints`;
             
             bot?.sendMessage(chatId, `🛠 *Quick Complaint*\n\nYou are already linked! Click below to file a complaint directly:`, {
@@ -134,7 +134,7 @@ if (token) {
                      await Admin.findOne({ 'profile.telegramChatId': chatId.toString() });
 
         if (user) {
-            const token = generateToken(user._id as string);
+            const token = generateToken(user._id.toString());
             const magicLink = `${process.env.FRONTEND_URL || 'https://shams-green.vercel.app'}/login?token=${token}&redirect=/student/leaves`;
             
             bot?.sendMessage(chatId, `🏠 *Apply for Leave*\n\nYou are already linked! Apply for your pass directly:`, {
