@@ -1,54 +1,51 @@
-# 🏫 Smart HMS: The Ultimate Hostel Management Ecosystem
+# 🏫 SHAMS: Smart Hostel Management System
+### *The Ultimate Enterprise-Grade Hostel Management Ecosystem*
 
 [![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
 [![MongoDB](https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+[![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://vercel.com/)
+[![Render](https://img.shields.io/badge/Render-46E3B7?style=for-the-badge&logo=render&logoColor=white)](https://render.com/)
 
-A high-performance, enterprise-grade MERN stack ecosystem designed for modern university residences. **Smart HMS** transcends traditional management by integrating AI-driven insights, biometric security, and real-time synchronization to create a seamless living experience for students and a powerful command center for administrators.
+**SHAMS** (Smart Hostel Management System) is a high-performance, production-ready MERN stack ecosystem designed for modern university residences. It transcends traditional management by integrating AI-driven insights, biometric security, and real-time synchronization to create a seamless living experience for students and a powerful command center for administrators.
 
 ---
 
 ## 🌟 Visionary Features
 
+### 🔐 Security & Identity 2.0
+- **✨ Biometric & Passkey Auth**: Integrated **WebAuthn** support for hardware-based, passwordless login security using Fingerprint, FaceID, or Device PIN.
+- **✨ Dynamic QR Identity**: Real-time rotating QR codes for student entry/exit verification with instant security logging and anti-spoofing logic.
+- **✨ Digital ID Cards**: High-fidelity virtual ID cards with embedded QR technology and instant status verification for campus services.
+
 ### 🤖 Intelligence & Automation
 - **✨ Hybrid AI Notification Engine**: Leveraging **Google Gemini 1.5 Pro**, the system delivers precise structured alerts enhanced by context-aware AI summaries.
-- **✨ AI Complaint Intelligence**: Auto-categorization, priority detection, and generated resolution strategies for incoming grievances.
-- **✨ Smart Room Recommendations**: Personalized suggestion engine based on occupancy metrics, student preferences, and historical data.
-
-### 🔐 Security & Identity
-- **✨ Biometric & Passkey Auth**: Integrated **WebAuthn** support for hardware-based, passwordless login security (Fingerprint/FaceID).
-- **✨ Dynamic QR Identity**: Real-time rotating QR codes for student entry/exit verification with instant security logging.
-- **✨ Digital ID Cards**: High-fidelity virtual ID cards with embedded QR technology and instant status verification.
+- **✨ AI Complaint Intelligence**: Auto-categorization, priority detection, and generated resolution strategies for incoming student grievances.
+- **✨ Smart Room Selection**: A "BookMyShow" style interactive room picker allowing students to view occupancy and select roommates in real-time.
 
 ### 💳 Financial & Operational
-- **✨ Razorpay Integration**: Seamless digital fee payments with instant ledger updates and automated receipt generation.
-- **✨ Command Center (Chief Warden)**: A real-time monitoring hub with live attendance heatmaps, occupancy trends, and broadcast capabilities.
-- **✨ Mess Management 2.0**: Predictive diner analytics, weekly menu configuration, and separate Veg/Non-Veg tracking systems.
+- **✨ Razorpay Integration**: Seamless digital fee payments with instant ledger updates, automated receipt generation, and transaction tracking.
+- **✨ Multi-Cloud Deployment**: Frontend optimized for **Vercel Edge** with reverse-proxying, and Backend hosted on **Render** for high-availability.
+- **✨ Mess Management**: Predictive diner analytics, weekly menu configuration, and separate tracking for Veg/Non-Veg/Special diets.
 
 ---
 
 ## 👥 Role-Specific Portals
 
 ### 👨‍🎓 Student Experience
-- **Digital Command Center**: Real-time overview of attendance, mess schedules, and active alerts.
+- **Digital Command Center**: Real-time overview of attendance, fee status, and active hostel announcements.
 - **Infrastructure Services**: Apply for room allocations, track laundry status, and manage parcel pickups.
-- **Life Management**: Seamless leave applications, visitor pre-registration, and interactive feedback systems.
+- **Life Management**: Seamless leave applications with parent notification and visitor pre-registration.
 
 ### 🧑‍💼 Chief Warden (Command Center)
-- **High-Level Oversight**: Approve/Reject room allocations and monitor overarching hostel health.
-- **Financial Ledger**: Track billing, invoices, and offline payment verifications.
-- **Staff Management**: Monitor Warden performance and handle escalated complaints.
+- **High-Level Oversight**: Real-time monitoring hub with live attendance heatmaps and occupancy trends.
+- **Global Management**: Manage staff (Wardens), broadcast global announcements, and handle escalated grievances.
+- **Finance Hub**: Track total revenue, verify offline payments, and generate monthly financial reports.
 
 ### 🧑‍🔧 Warden (Operational Desk)
-- **Daily Rounds**: Fast-action mobile interface for night attendance verification.
-- **Local Resolution**: Level 1 complaint handling and block-level announcement broadcasting.
-- **Gatekeeper Services**: Verify student movements and log incoming packages.
-
-### 🛡️ Security & Staff
-- **QR Scanning Hub**: Instant verification for student entry/exit and visitor logging.
-- **Movement Analytics**: Real-time logs of student presence and late-entry flags.
+- **Daily Operations**: Manage block-specific attendance, verify student movements, and handle local complaints.
+- **Resource Management**: Assign/Reassign rooms at the block level and monitor student document verification status.
 
 ---
 
@@ -56,82 +53,71 @@ A high-performance, enterprise-grade MERN stack ecosystem designed for modern un
 
 | Category | Technologies |
 | :--- | :--- |
-| **Frontend** | React, Vite, TypeScript, Tailwind CSS, Framer Motion, React Query, Zustand |
-| **Backend** | Node.js, Express.js, TypeScript, Socket.io, Node-Cron, Nodemailer |
-| **Database** | MongoDB, Mongoose ODM |
-| **AI/ML** | Google Generative AI (Gemini 1.5), Custom NLP Pipelines |
-| **Integration** | Razorpay SDK, WebAuthn (Passkeys), Cloudinary (Assets) |
+| **Frontend** | React 18, Vite, TypeScript, Tailwind CSS, Framer Motion, Zustand |
+| **Backend** | Node.js, Express.js, TypeScript, Mongoose ODM |
+| **Cloud** | Vercel (Frontend), Render (Backend), MongoDB Atlas (Database) |
+| **Security** | WebAuthn (Passkeys), JWT, Argon2 Hashing, HTTPS |
+| **Integration** | Razorpay SDK, Google Gemini AI API, Cloudinary |
 
 ---
 
-## 📂 Project Architecture
+## 🚀 Deployment & Installation
 
+### 🏗️ Architecture
+The system is designed for a decoupled deployment:
+- **Frontend**: Deployed on Vercel (`client/` root). Uses `vercel.json` to proxy `/api` requests to the backend.
+- **Backend**: Deployed on Render (`server/` root).
+
+### 1. Clone & Install
 ```bash
-smart-hms/
-├── client/                     # Frontend React Ecosystem
-│   ├── src/
-│   │   ├── api/                # Standardized Axios interfaces
-│   │   ├── components/         # Premium UI Components & Role Layouts
-│   │   ├── pages/              # Role-Based Modular Pages
-│   │   │   ├── admin/          # Shared Administrative Modules
-│   │   │   ├── chief-warden/   # Exclusive Chief Warden Command Pages
-│   │   │   ├── warden/         # Warden Operational Modules
-│   │   │   └── student/        # Student Self-Service Portal
-│   │   ├── store/              # Global State (Zustand)
-│   │   └── types/              # Centralized TypeScript Definitions
-├── server/                     # Backend API & WebSocket Engine
-│   ├── src/
-│   │   ├── controllers/        # Enterprise Request Logic
-│   │   ├── models/             # Mongoose Schemas & Middleware
-│   │   ├── routes/             # RBAC Protected API Endpoints
-│   │   └── socket/             # Real-time Event Handlers
+git clone https://github.com/thanujkrishna28/SHAMS.git
+cd SHAMS
 ```
 
----
-
-## 🚀 Getting Started
-
-### 1. Repository Setup
-```bash
-git clone https://github.com/your-org/smart-hms.git
-cd smart-hms
-```
-
-### 2. Backend Configuration
+### 2. Backend Setup (`/server`)
 ```bash
 cd server
 npm install
-# Create .env with:
-# PORT=5000, MONGO_URI, JWT_SECRET, GEMINI_API_KEY, RAZORPAY_KEY, etc.
-npm run dev
+# Create .env with MONGO_URI, JWT_SECRET, GEMINI_API_KEY, etc.
+npm run build
+npm start
 ```
 
-### 3. Frontend Initialization
+### 3. Frontend Setup (`/client`)
 ```bash
-cd ../client
+cd client
 npm install
-npm run dev
+npm run build
+# Ensure vercel.json points to your backend URL
 ```
 
-### 4. Database Seeding (Optional)
-```bash
-# In server directory
-npm run seed  # Populates sample buildings, staff, and a test student
-```
+### 4. Admin Credentials
+The system comes with default master credentials for initialization:
+- **Chief Warden**: `warden@university.edu` / `warden123`
+- **System Admin**: `admin@university.edu` / `admin123`
 
 ---
 
-## 🎓 Academic Integration
-Optimized for **Vignan University** standards, supporting:
-- **Biogas Sustainability Tracking**
-- **SLA-Based Complaint Resolution**
-- **Hybrid Mess Preferences** (Veg/Non-Veg/Special)
+## 📂 Project Structure
+```bash
+SHAMS/
+├── client/                 # Frontend React (Vite + TypeScript)
+│   ├── src/
+│   │   ├── pages/          # Modular role-based pages (Student, Warden, Chief)
+│   │   ├── components/     # Glassmorphic UI components
+│   │   └── store/          # Zustand auth and state management
+├── server/                 # Backend API (Node + Express + TS)
+│   ├── src/
+│   │   ├── controllers/    # Business logic & AI integration
+│   │   ├── models/         # Mongoose relational schemas
+│   │   └── scripts/        # Database maintenance & seeding tools
+```
+
+---
 
 ## 📝 License
-Distributed under the **MIT License**. See `LICENSE` for more information.
-
----
+Distributed under the **MIT License**.
 
 <p align="center">
-  Built with ❤️ by the Antigravity Team
+  Built with ❤️ by <b>Antigravity Team</b>
 </p>
