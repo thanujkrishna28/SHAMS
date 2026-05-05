@@ -55,7 +55,7 @@ const AuditLogs = () => {
                         <RefreshCw size={16} />
                     </button>
                     <button
-                        onClick={() => window.open(`${import.meta.env.VITE_API_URL}/reports/audit`, '_blank')}
+                        onClick={() => window.open(`${import.meta.env.VITE_API_BASE_URL}/reports/audit`, '_blank')}
                         className="bg-slate-900 text-white px-4 py-2 rounded-lg font-bold text-[11px] flex items-center gap-2 shadow-lg shadow-slate-200 uppercase tracking-widest active:scale-95 transition-all"
                     >
                         <Download size={16} />

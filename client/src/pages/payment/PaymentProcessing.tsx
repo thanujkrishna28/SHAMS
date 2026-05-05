@@ -18,7 +18,7 @@ const PaymentProcessing: React.FC = () => {
 
         const pollInterval = setInterval(async () => {
             try {
-                const response = await axios.get(`${import.meta.env.VITE_API_URL || '/api'}/fees/status/${feeId}`, {
+                const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL || '/api'}/fees/status/${feeId}`, {
                     headers: {
                         Authorization: `Bearer ${localStorage.getItem('token')}`
                     }
