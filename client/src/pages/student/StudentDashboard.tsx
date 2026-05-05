@@ -128,7 +128,8 @@ const StudentDashboard = () => {
                             <p className="text-gray-500 mt-1 text-sm">
                                 {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                             </p>
-                        </div>
+                            </div>
+                    </div>
 
                         {settings?.roomChangeEnabled && user?.profile?.room && (
                             <motion.button
