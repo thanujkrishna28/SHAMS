@@ -5,12 +5,25 @@ import Admin from '../models/Admin';
 import Warden from '../models/Warden';
 
 export const configurePassport = () => {
+    const clientID = process.env.GOOGLE_CLIENT_ID;
+    const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+    const callbackURL = process.env.GOOGLE_CALLBACK_URL;
+
+    if (!clientID || !clientSecret || !callbackURL) {
+        console.error('[PASSPORT] Missing Google OAuth environment variables:', {
+            clientID: !!clientID,
+            clientSecret: !!clientSecret,
+            callbackURL: !!callbackURL
+        });
+        return; // Don't initialize if variables are missing
+    }
+
     passport.use(
         new GoogleStrategy(
             {
-                clientID: process.env.GOOGLE_CLIENT_ID!,
-                clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-                callbackURL: process.env.GOOGLE_CALLBACK_URL!,
+                clientID,
+                clientSecret,
+                callbackURL,
             },
             async (accessToken, refreshToken, profile, done) => {
                 const { id, displayName, emails, photos } = profile;
